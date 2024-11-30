@@ -32,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
     {
         float moveX = Input.GetAxis("Horizontal"); // Get -1, 1 or 0 depending on Q, D or nothing pressed
 
+        float lastSpeed = math.abs(rb.velocity.x);
+
         if (isGrounded)
         {
             float newXSpeed = rb.velocity.x + moveX * acceleration; // Increasing gradualy the speed depending on your acceleration
@@ -43,6 +45,17 @@ public class PlayerMovement : MonoBehaviour
             float newXSpeed = rb.velocity.x + moveX * acceleration * airControlFactor; // Increasing gradualy the speed depending on your acceleration. The acceleration is diminued by airControlFactor cause the player is in the air
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
             rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
+        }
+
+        UpdateMaxSpeedReachable(math.abs(rb.velocity.x) > lastSpeed);
+    }
+
+    void UpdateMaxSpeedReachable(bool isAccelerationg)
+    {
+        if (!isAccelerationg)
+        {
+            // Decrease the maxSpeed depending on the curent speed
+            maxSpeedReachable = math.clamp(math.abs(rb.velocity.x) + 3, initialMaxSpeed, maxSpeedReachable);
         }
     }
 
