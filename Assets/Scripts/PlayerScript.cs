@@ -17,11 +17,8 @@ public class PlayerMovement : MonoBehaviour
     public float speedBuffer; // Use to keep in memory a speed
     private float wallTouchTime; // Last time the wall was touch
     public float wallJumpWindow = 3f; // Time you have to do a perfect wall jump
-
-    public LayerMask wallLayer;
     public WallCheckScript rightSide;
     public WallCheckScript leftSide;
-    public float wallCheckRadius = 0.2f;
 
 
     void Start()
@@ -35,7 +32,17 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsTouchingWall()
     {
-        return rightSide.IsTouchingWall() || leftSide.IsTouchingWall();
+        if (rightSide.IsTouchingWall())
+        {
+            leftSide.setEnable();
+            return true;
+        }
+        else if (leftSide.IsTouchingWall())
+        {
+            rightSide.setEnable();
+            return true;
+        }
+        return false;
     }
 
     void Update()
@@ -53,6 +60,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (isGrounded)
         {
+            rightSide.setEnable();
+            leftSide.setEnable();
             rb.gravityScale = 7;
             float newXSpeed = rb.velocity.x + moveX * acceleration; // Increasing gradualy the speed depending on your acceleration
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
@@ -110,19 +119,18 @@ public class PlayerMovement : MonoBehaviour
     void WallJump()
     {
         float moveX = getOppositeDirectionFromWall();
-        rb.velocity = new Vector2(maxSpeedReachable - 5, rb.velocity.y);
-        Jump();
+        rb.velocity = new Vector2((maxSpeedReachable - 5) * moveX, jumpForce);
     }
 
     float getOppositeDirectionFromWall()
     {
         if (rightSide.IsTouchingWall())
         {
-            return 1;
+            return -1;
         }
         else 
         {
-            return -1;
+            return 1;
         }
     }
 
