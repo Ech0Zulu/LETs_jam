@@ -1,22 +1,40 @@
+using System.Collections;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float acceleration; // "Speed" at wich you reach your maximum speed
-    public float airControlFactor = 0.002f; // Amount of control in the air (0 = no control, 1 = full control)
-    public float jumpHeight = 20f; // Hight of a jump
-    public float jumpRatio = 10f; // True force of the jump
-    private float jumpForce; // Variable for unity to use
+
+    [Header("Movements")]
+
+
+
+    public float acceleration;                      // "Speed" at wich you reach your maximum speed
+    public float airControlFactor = 0.002f;         // Amount of control in the air (0 = no control, 1 = full control)
+    public float jumpHeight = 20f;                  // Hight of a jump
+    public float jumpRatio = 10f;                   // True force of the jump
+    private float jumpForce;                        // Variable for unity to use
     private Rigidbody2D rb;
-    public bool isGrounded; // 1 when on the ground. 0 when not
-    public bool isTouchingWall; // If the player is touching a wall
-    public float maxSpeedReachable; // Max speed reachable right now. Will change a lot (every time you do something to accelerate)
+    public bool isGrounded;                         // 1 when on the ground. 0 when not
+    public bool isTouchingWall;                     // If the player is touching a wall
+    public float maxSpeedReachable;                 // Max speed reachable right now. Will change a lot (every time you do something to accelerate)
     private float initialMaxSpeed = 20f;
-    public float speedBuffer; // Use to keep in memory a speed
-    private float wallTouchTime; // Last time the wall was touch
-    public float wallJumpWindow = 3f; // Time you have to do a perfect wall jump
+    public float speedBuffer;                       // Use to keep in memory a speed
+    private float wallTouchTime;                    // Last time the wall was touch
+    public float wallJumpWindow = 3f;               // Time you have to do a perfect wall jump
+
+
+    public bool canAttack = false;
+    public float attackCD = 1f;
+    public float curAttackCD = 0f;
+    public float detectionRadius = 10f;             // Radius to check for enemies
+    public LayerMask enemyLayer;                    // Layer mask for enemies
+    private GameObject nearestEnemy;                // Nearest enemy detected
+    public float attackDistance = 5f;
+    public float dashTime = 0.5f;
+    
+
 
     void Start()
     {
@@ -28,8 +46,85 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        HandleMovement(); 
+        HandleMovement();
         HandleJump();
+        DetectNearestEnemy();
+        HandleAttack();
+    }
+
+    private void HandleAttack()
+    {
+        if (!canAttack)
+        {
+            curAttackCD += Time.deltaTime;
+            if (curAttackCD >= attackCD)
+            {
+                curAttackCD = 0f;
+                canAttack = true;
+            }
+        }
+        else if (Input.GetKey(KeyCode.E) && nearestEnemy != null)
+        {
+            Vector2 enemyPos = nearestEnemy.transform.position;
+            Destroy(nearestEnemy);
+            StartCoroutine(DashToward(enemyPos,attackDistance));
+            canAttack = false;
+        }
+    }
+
+    private IEnumerator DashToward(Vector2 direction, float distance)
+    {
+        float elapsedTime = 0f; // Tracks the time elapsed during the dash
+        Vector2 startPosition = transform.position; // Player's starting position
+        Vector2 targetPosition = startPosition + direction.normalized * distance; // Target position to dash toward
+
+        while (elapsedTime < dashTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / dashTime; // Normalized time (0 to 1)
+
+            // Move the player smoothly toward the target position
+            transform.position = Vector2.Lerp(startPosition, targetPosition, t);
+
+            yield return null; // Wait until the next frame
+        }
+
+        // Ensure the player ends up exactly at the target position
+        transform.position = targetPosition;
+    }
+
+    private void DetectNearestEnemy()
+    {
+        // Detect all enemies within the detection radius
+        Collider2D[] detectedEnemies = Physics2D.OverlapCircleAll(transform.position, detectionRadius, enemyLayer);
+
+        float shortestDistance = Mathf.Infinity;
+        nearestEnemy = null;
+        if (detectedEnemies.Length < 0)
+        {
+            nearestEnemy = null;
+        }
+        else
+        {
+            foreach (Collider2D enemy in detectedEnemies)
+            {
+                if (enemy.CompareTag("Enemy"))
+                {
+                    Debug.Log("Enemy found : " + enemy.gameObject.name);
+                    float distanceToEnemy = Vector2.Distance(transform.position, enemy.transform.position);
+                    if (distanceToEnemy < shortestDistance)
+                    {
+                        shortestDistance = distanceToEnemy;
+                        nearestEnemy = enemy.gameObject;
+                    }
+                }
+            }
+        }
+        if (nearestEnemy != null)
+        {
+            Debug.Log("Nearest enemy : " + nearestEnemy.name);
+        }
+        else Debug.Log("No enemy around");
     }
 
     void HandleMovement()
@@ -38,14 +133,16 @@ public class PlayerMovement : MonoBehaviour
 
         float lastSpeed = math.abs(rb.velocity.x);
 
-        if (isTouchingWall) 
+        if (isTouchingWall)
         {
             // If the player is touching the wall, stop vertical movement
-            if (Input.GetAxis("Vertical") < 0) 
+            if (Input.GetAxis("Vertical") < 0)
             {
                 rb.velocity = new Vector2(rb.velocity.x, -5); // Move downwards if the player presses down (optional)
             }
-        } else {
+        }
+        else
+        {
 
             if (isGrounded)
             {
@@ -169,7 +266,8 @@ public class PlayerMovement : MonoBehaviour
         transform.position = coords; // Teleport the player to the point
     }
 
-    public void increaseMaxSpeed(float deltaSpeed) {
+    public void increaseMaxSpeed(float deltaSpeed)
+    {
         maxSpeedReachable += deltaSpeed;
         updateAcceleration();
     }
