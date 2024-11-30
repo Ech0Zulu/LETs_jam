@@ -11,8 +11,12 @@ public class PlayerMovement : MonoBehaviour
     private float jumpForce; // Variable for unity to use
     private Rigidbody2D rb;
     public bool isGrounded; // 1 when on the ground. 0 when not
+    public bool isTouchingWall; // If the player is touching a wall
     public float maxSpeedReachable; // Max speed reachable right now. Will change a lot (every time you do something to accelerate)
     private float initialMaxSpeed = 20f;
+    public float speedBuffer; // Use to keep in memory a speed
+    private float wallTouchTime; // Last time the wall was touch
+    public float wallJumpWindow = 3f; // Time you have to do a perfect wall jump
 
     void Start()
     {
@@ -34,20 +38,30 @@ public class PlayerMovement : MonoBehaviour
 
         float lastSpeed = math.abs(rb.velocity.x);
 
-        if (isGrounded)
+        if (isTouchingWall) 
         {
-            float newXSpeed = rb.velocity.x + moveX * acceleration; // Increasing gradualy the speed depending on your acceleration
-            newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
-            rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
-        }
-        else // If in the air
-        {
-            float newXSpeed = rb.velocity.x + moveX * acceleration * airControlFactor; // Increasing gradualy the speed depending on your acceleration. The acceleration is diminued by airControlFactor cause the player is in the air
-            newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
-            rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
-        }
+            // If the player is touching the wall, stop vertical movement
+            if (Input.GetAxis("Vertical") < 0) 
+            {
+                rb.velocity = new Vector2(rb.velocity.x, -5); // Move downwards if the player presses down (optional)
+            }
+        } else {
 
-        UpdateMaxSpeedReachable(math.abs(rb.velocity.x) > lastSpeed);
+            if (isGrounded)
+            {
+                float newXSpeed = rb.velocity.x + moveX * acceleration; // Increasing gradualy the speed depending on your acceleration
+                newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
+                rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
+            }
+            else // If in the air
+            {
+                float newXSpeed = rb.velocity.x + moveX * acceleration * airControlFactor; // Increasing gradualy the speed depending on your acceleration. The acceleration is diminued by airControlFactor cause the player is in the air
+                newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
+                rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
+            }
+
+            UpdateMaxSpeedReachable(math.abs(rb.velocity.x) > lastSpeed);
+        }
     }
 
     void UpdateMaxSpeedReachable(bool isAccelerationg)
@@ -66,6 +80,10 @@ public class PlayerMovement : MonoBehaviour
         {
             Jump();
         }
+        else if (Input.GetButtonDown("Jump") && isTouchingWall) // If space pressed and player on the ground
+        {
+            WallJump();
+        }
     }
 
     void Jump()
@@ -73,6 +91,18 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         isGrounded = false;
         maxSpeedReachable += 2;
+    }
+
+    void WallJump()
+    {
+        float timeSinceWallTouch = Time.time - wallTouchTime;
+        if (timeSinceWallTouch <= wallJumpWindow)
+        {
+            float moveX = Input.GetAxis("Horizontal"); // Get -1, 1 or 0 depending on Q, D or nothing pressed
+            rb.velocity = new Vector2(speedBuffer * moveX, 0);
+        }
+        Jump();
+        LeaveWall();
     }
 
     // Change the speed at wich the player falls. Does not change the height he can jump
@@ -89,6 +119,15 @@ public class PlayerMovement : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            isTouchingWall = true; // Player is touching a wall
+            speedBuffer = 20; // Soucis
+            wallTouchTime = Time.time;
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+            rb.gravityScale = 0;
+        }
+
         // Check if the player is touching the ground
         if (collision.gameObject.CompareTag("Ground"))
         {
@@ -99,6 +138,10 @@ public class PlayerMovement : MonoBehaviour
     // Usefull when you fall of without jumping
     void OnCollisionExit2D(Collision2D collision)
     {
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            LeaveWall();
+        }
         // Check if the player is no longer touching the ground
         if (collision.gameObject.CompareTag("Ground"))
         {
@@ -106,6 +149,13 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    void LeaveWall()
+    {
+        isTouchingWall = false; // Player is no longer touching a wall
+        speedBuffer = 0;
+        wallTouchTime = 0;
+        rb.gravityScale = 7;
+    }
 
     public void Respawn(Vector2 respawnPoint)
     {
@@ -126,6 +176,6 @@ public class PlayerMovement : MonoBehaviour
 
     void updateAcceleration()
     {
-        acceleration = maxSpeedReachable / 10;
+        acceleration = maxSpeedReachable / 10; // If high speed, it's still reachable
     }
 }
