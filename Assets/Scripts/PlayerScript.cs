@@ -93,7 +93,16 @@ public class PlayerMovement : MonoBehaviour
             //HandleAttack();
         }
         Flip();
-        animator.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
+        HandleAnimator();
+    }
+
+    private void HandleAnimator()
+    {
+        //Debug.Log(Mathf.Abs(rb.velocity.x) + " " + Mathf.Abs(rb.velocity.y) + " " + isGrounded);
+        animator.SetFloat("XSpeed", Mathf.Abs(rb.velocity.x));
+        animator.SetFloat("YSpeed", Mathf.Abs(rb.velocity.y));
+        animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isTouchingWall", isTouchingWall);
     }
 
     private void Flip()
@@ -105,7 +114,7 @@ public class PlayerMovement : MonoBehaviour
         newScale.x = Orientation;
         transform.localScale = newScale;
     }
-
+    
     private void HandleAction(float dt)
     {
         if (curDashCD <= 0) curDashCD -= dt;
@@ -225,19 +234,7 @@ public class PlayerMovement : MonoBehaviour
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
             if (isTouchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
             rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
-        }/*
-        else if (isTouchingWall)
-        {
-
-
-            rb.gravityScale = 0;
-            rb.velocity = new Vector2(rb.velocity.x, 0);
-            // If the player is touching the wall, stop vertical movement
-            if (Input.GetAxis("Vertical") < 0)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, -5); // Move downwards if the player presses down (optional)
-            }
-        }*/
+        }
         else // If in the air
         {
             rb.gravityScale = 7;
