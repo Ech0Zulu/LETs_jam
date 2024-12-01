@@ -118,8 +118,7 @@ public class PlayerMovement : MonoBehaviour
     
     private void HandleAction(float dt)
     {
-        if (curDashCD <= 0) curDashCD -= dt;
-        if (curDashCD < 0) curDashCD = 0;
+        int i = 0;
     }
 
     private bool CanDash()
@@ -129,7 +128,9 @@ public class PlayerMovement : MonoBehaviour
     
     private void HandleDash()
     {
-        if (/*CanDash() && */(Input.GetMouseButtonDown(0)))
+        if (curDashCD > 0) curDashCD -= Time.deltaTime;
+        if (curDashCD < 0) curDashCD = 0;
+        if (CanDash() && (Input.GetMouseButtonDown(0)))
         {
             // Get one of the 8 direction possible depending on ZQSD/WASD
             Vector2 direction = new Vector2(
@@ -165,15 +166,73 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public Vector2 GetValidTargetPosition(Vector2 startPosition, Vector2 direction, float distance)
+    {
+        // Calculate the initial target position
+        Vector2 targetPosition = startPosition + direction.normalized * distance;
+        Debug.DrawLine(startPosition, targetPosition, Color.red, 1f);
+
+        // Perform a raycast from the start to the target position
+        RaycastHit2D hit = Physics2D.Raycast(startPosition, direction, distance, environementLayer);
+
+        if (hit.collider != null)
+        {
+            // If the ray hits a wall, adjust the target position
+            targetPosition = hit.point - direction.normalized * 0.6f;
+        }
+        /*
+        float searchRadius = dashRange; // Rayon de recherche
+        float stepSize = 0.5f; // Taille des pas pour la recherche
+        float closestDistance = Mathf.Infinity; // Initialisation de la distance minimale
+        Vector2 closestEmptyPoint = targetPosition; // Initialisation du point valide
+
+        // Parcourir une grille autour de la position cible
+        for (float x = -searchRadius; x <= searchRadius; x += stepSize)
+        {
+            for (float y = -searchRadius; y <= searchRadius; y += stepSize)
+            {
+                Vector2 testPoint = targetPosition + new Vector2(x, y);
+
+                // Vérifiez si le point est vide
+                if (IsPointEmpty(testPoint))
+                {
+                    float d = Vector2.Distance(targetPosition, testPoint);
+                    if (d < closestDistance)
+                    {
+                        closestDistance = distance;
+                        closestEmptyPoint = testPoint;
+                    }
+                }
+            }
+        }
+        
+
+        return closestEmptyPoint;
+        */
+        return targetPosition;
+    }
+
+    private bool IsPointEmpty(Vector2 point)
+    {
+        // Vérifier s'il y a un collider dans "EnvironmentLayer" à cet endroit
+        Collider2D hit = Physics2D.OverlapPoint(point, environementLayer);
+        return hit == null; // Le point est vide s'il n'y a pas de collision
+    }
+
     private IEnumerator DashCoroutine(Vector2 direction, float distance, float dashTime)
     {
         isDashing = true;
+
+        curDashCD = dashCD;
 
         Vector2 bufferSpeed = rb.velocity; // Remeber the speed of the player before the dash
         rb.velocity = new Vector2(0,0);
 
         Vector2 startPosition = transform.position;
-        Vector2 targetPosition = startPosition + direction * distance;
+        Vector2 targetPosition;
+
+        targetPosition = GetValidTargetPosition(startPosition, direction, distance);
+        Debug.DrawLine(startPosition, targetPosition, Color.green, 1f);
         
         float elapsedTime = 0f;
 
