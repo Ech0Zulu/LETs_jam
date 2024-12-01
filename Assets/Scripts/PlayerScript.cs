@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody2D rb;
     private Animator animator;
+    [SerializeField]
+    private float Orientation = 1; // The X scale factor for the player. -1 when faceing left, 1 when facing right
 
     [Header("Jump")]
     public float jumpHeight = 20f;                  // Hight of a jump
@@ -25,10 +27,10 @@ public class PlayerMovement : MonoBehaviour
     public bool isTouchingWall;                     // If the player is touching a wall
     private float wallTouchTime;                    // Last time the wall was touch
     public float wallJumpWindow = 3f;               // Time you have to do a perfect wall jump
+    public float wallCheckRadius = 0.2f;            // Radius of the circle for wall detection
+    public LayerMask wallLayer;                     // The layer that represents walls
     [SerializeField]
-    private WallCheckScript rightSide;
-    [SerializeField]
-    private WallCheckScript leftSide;
+    private Transform wallCheck;
 
     [Header("Dash")]
     public bool canDash = true;
@@ -61,17 +63,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsTouchingWall()
     {
-        if (rightSide.IsTouchingWall())
-        {
-            leftSide.setEnable();
-            return true;
-        }
-        else if (leftSide.IsTouchingWall())
-        {
-            rightSide.setEnable();
-            return true;
-        }
-        return false;
+        return Physics2D.OverlapCircle(wallCheck.position, wallCheckRadius, wallLayer);
     }
 
     void Update()
@@ -90,8 +82,16 @@ public class PlayerMovement : MonoBehaviour
 
     private void Flip()
     {
+        if (rb.velocity.x > 0.1f) Orientation = 1; 
+        else if (rb.velocity.x < -0.1f) Orientation = -1;
+
+        Vector3 newScale = transform.localScale;
+        newScale.x = Orientation;
+        transform.localScale = newScale;
+        /*
         if (rb.velocity.x > 0.1f) GetComponent<SpriteRenderer>().flipX = false;
         else if (rb.velocity.x < -0.1f) GetComponent<SpriteRenderer>().flipX = true;
+        */
     }
 
     /*private void HandleAction(float dt)
@@ -198,8 +198,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (isGrounded)
         {
-            rightSide.setEnable();
-            leftSide.setEnable();
             rb.gravityScale = 7;
             float newXSpeed = rb.velocity.x + moveX * acceleration; // Increasing gradualy the speed depending on your acceleration
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
@@ -237,7 +235,7 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded) // If space pressed and player on the ground
+        if (Input.GetButtonDown("Jump") && isGrounded && !isTouchingWall) // If space pressed and player on the ground
         {
             Jump();
         }
@@ -256,21 +254,10 @@ public class PlayerMovement : MonoBehaviour
 
     void WallJump()
     {
-        float moveX = getOppositeDirectionFromWall();
-        rb.velocity = new Vector2((maxSpeedReachable - 5) * moveX, jumpForce);
+        float moveX = Orientation;
+        rb.velocity = new Vector2((maxSpeedReachable - 5) * -moveX, jumpForce);
     }
 
-    float getOppositeDirectionFromWall()
-    {
-        if (rightSide.IsTouchingWall())
-        {
-            return -1;
-        }
-        else
-        {
-            return 1;
-        }
-    }
 
     // Change the speed at wich the player falls. Does not change the height he can jump
     void ChangeGravityTo(float newGravity)

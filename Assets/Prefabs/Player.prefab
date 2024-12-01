@@ -9,9 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7986762182399678523}
-  - component: {fileID: 5880383608037068752}
   m_Layer: 0
-  m_Name: RightWallCheck
+  m_Name: WallCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,22 +31,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 7282646488511587804}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5880383608037068752
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 314909378812389105}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d5e628f482844f40a3b11f959aaa958, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wallCheckRadius: 0.2
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 8
 --- !u!1 &451349222491162853
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,6 +44,7 @@ GameObject:
   - component: {fileID: 497568101123667656}
   - component: {fileID: 4349025047606930661}
   - component: {fileID: 2450991239077950965}
+  - component: {fileID: 4876633896126095667}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -78,12 +62,11 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2105464043667273835}
   - {fileID: 7986762182399678523}
-  - {fileID: 3592567951279517344}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &8520456046003218595
@@ -127,12 +110,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: -35049265, guid: 0db4f49c76564d54ea2ec8da358634dc, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_DrawMode: 1
+  m_Size: {x: 1.5, y: 2.25}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -197,8 +180,8 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 1}
+  m_Offset: {x: 0.06486893, y: 0.0077090263}
+  m_Size: {x: 1.3287582, y: 2.2817163}
   m_Direction: 0
 --- !u!114 &2450991239077950965
 MonoBehaviour:
@@ -212,17 +195,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 555dd9dcdaf3c5547bc32c5e50a6b91a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceleration: 0
-  airControlFactor: 0.1
+  Orientation: 1
   jumpHeight: 25
   jumpRatio: 5
+  airControlFactor: 0.1
   isGrounded: 0
-  isTouchingWall: 0
   maxSpeedReachable: 0
-  speedBuffer: 0
+  acceleration: 0
+  isTouchingWall: 0
   wallJumpWindow: 3
-  rightSide: {fileID: 5880383608037068752}
-  leftSide: {fileID: 8823678832508748639}
+  wallCheckRadius: 0.2
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 8
+  wallCheck: {fileID: 7986762182399678523}
+  canDash: 1
+  dashTime: 0.5
+  dashRange: 2
+  dashCD: 3
+  curDashCD: 3
+  canAttack: 0
+  attackCD: 1
+  attackDistance: 5
+  detectionRadius: 10
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 0
+--- !u!95 &4876633896126095667
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 451349222491162853}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: c8d909282d1d1be498699061f559e97e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &2475907692344419399
 GameObject:
   m_ObjectHideFlags: 0
@@ -250,7 +269,7 @@ Transform:
   m_GameObject: {fileID: 2475907692344419399}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -20}
+  m_LocalPosition: {x: 0, y: 0.936, z: -20}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -266,7 +285,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.690566, g: 0.5692523, b: 0.5303026, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -291,7 +310,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -315,51 +334,3 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2475907692344419399}
   m_Enabled: 1
---- !u!1 &4608958148236475841
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3592567951279517344}
-  - component: {fileID: 8823678832508748639}
-  m_Layer: 0
-  m_Name: LeftWallCheck
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3592567951279517344
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4608958148236475841}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.2, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7282646488511587804}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8823678832508748639
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4608958148236475841}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d5e628f482844f40a3b11f959aaa958, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  wallCheckRadius: 0.2
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 8
