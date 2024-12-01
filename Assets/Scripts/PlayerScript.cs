@@ -20,19 +20,20 @@ public class PlayerMovement : MonoBehaviour
     private float jumpForce;                        // Variable for unity to use
 
     [Header("Speed")]
-    public float maxSpeedReachable;                 // Max speed reachable right now. Will change a lot (every time you do something to accelerate)
+    public float maxSpeed;                          // Max speed reachable right now. Will change a lot (every time you do something to accelerate)
     public float acceleration;                      // "Speed" at wich you reach your maximum speed
-    private float speedBuffer = 0;                       // Use to keep in memory a speed
+    private float speedBuffer = 0;                  // Use to keep in memory a speed
     private float initialMaxSpeed = 20f;
     public float boostPerfectWallJump = 2f;
     public float termialFallingSpeed = -20f;
+    public float FLOW = 0f;                         // FLOW of the player
 
     [Header("JumpWall")]
     public bool isTouchingWall;                     // If the player is touching a wall
     private float wallTouchTime;                    // Last time the wall was touch
     public float wallJumpWindow = 3f;               // Time you have to do a perfect wall jump
-    public float checkRadius = 0.2f;            // Radius of the circle for wall detection
-    public LayerMask environementLayer;                     // The layer that represents walls and
+    public float checkRadius = 0.2f;                // Radius of the circle for wall detection
+    public LayerMask environementLayer;             // The layer that represents walls and
     [SerializeField]
     private Transform wallCheck;
     [SerializeField]
@@ -62,7 +63,7 @@ public class PlayerMovement : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
-        maxSpeedReachable = initialMaxSpeed; //Max speed init
+        maxSpeed = initialMaxSpeed; //Max speed init
         // !HAVE TO BE AFTER THE MAX SPEED INITIALIZATION!
         updateAcceleration(); // Initialize the acceleration based on your current max speed
         UpdateJumpForce(rb.gravityScale);
@@ -78,12 +79,16 @@ public class PlayerMovement : MonoBehaviour
         return Physics2D.OverlapCircle(groundCheck.position, checkRadius, environementLayer);
     }
 
+    private void UpdateFLOW()
+    {
+        FLOW = maxSpeed;
+    }
+
     void Update()
     {
         float dt = Time.deltaTime;
         isTouchingWall = IsTouchingWall();
         isGrounded = IsGrounded();
-        HandleAction(dt);
         HandleDash();
         if (!isDashing)
         {
@@ -95,6 +100,7 @@ public class PlayerMovement : MonoBehaviour
         }
         Flip();
         HandleAnimator();
+        UpdateFLOW();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -114,8 +120,8 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("YSpeed", Mathf.Abs(rb.velocity.y));
         animator.SetBool("isGrounded", isGrounded);
         animator.SetBool("isTouchingWall", isTouchingWall);
-        animator.SetBool("isDashing",isDashing);
-        animator.SetBool("isAttacking",isAttacking);
+        animator.SetBool("isDashing", isDashing);
+        animator.SetBool("isAttacking", isAttacking);
     }
 
     private void Flip()
@@ -126,11 +132,6 @@ public class PlayerMovement : MonoBehaviour
         Vector3 newScale = transform.localScale;
         newScale.x = Orientation;
         transform.localScale = newScale;
-    }
-    
-    private void HandleAction(float dt)
-    {
-        int i = 0;
     }
 
     private bool CanDash()
@@ -149,7 +150,7 @@ public class PlayerMovement : MonoBehaviour
                 Input.GetAxis("Horizontal") > 0 ? 1 : Input.GetAxis("Horizontal") < 0 ? -1 : 0,
                 Input.GetAxis("Vertical") > 0 ? 1 : Input.GetAxis("Vertical") < 0 ? -1 : 0
                 );
-            if (direction == Vector2.zero)direction = (Orientation == -1)?Vector2.left:Vector2.right;
+            // direction = (Orientation == -1)?Vector2.left:Vector2.right;
             StartCoroutine(DashCoroutine(direction, dashRange, dashTime)); // Dash
         }
     }
@@ -173,6 +174,9 @@ public class PlayerMovement : MonoBehaviour
                 Vector2 enemyPos = nearestEnemy.transform.position;
                 isAttacking = true;
                 Debug.Log(enemyPos);
+                float playerSpeed = rb.velocity.magnitude;
+                Vector2 direction = (enemyPos - (Vector2)transform.position).normalized;
+                rb.velocity = direction * (playerSpeed + 5);
                 StartCoroutine(DashCoroutine(enemyPos - (Vector2)transform.position, dashRange, dashTime));
                 canAttack = false;
                 nearestEnemy = null;
@@ -242,7 +246,7 @@ public class PlayerMovement : MonoBehaviour
 
         curDashCD = dashCD;
 
-        Vector2 bufferSpeed = rb.velocity; // Remeber the speed of the player before the dash
+        Vector2 bufferSpeed = rb.velocity; // Remember the speed of the player before the dash
         rb.velocity = new Vector2(0,0);
 
         Vector2 startPosition = transform.position;
@@ -315,7 +319,7 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.gravityScale = 7;
             float newXSpeed = rb.velocity.x + moveX * acceleration; // Increasing gradualy the speed depending on your acceleration
-            newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
+            newXSpeed = math.clamp(newXSpeed, maxSpeed * -1, maxSpeed); // Making sure you don't exceed your maximum speed
             if (isTouchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
             rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
         }
@@ -323,21 +327,25 @@ public class PlayerMovement : MonoBehaviour
         {
             rb.gravityScale = 7;
             float newXSpeed = rb.velocity.x + moveX * acceleration * airControlFactor; // Increasing gradualy the speed depending on your acceleration. The acceleration is diminued by airControlFactor cause the player is in the air
-            newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
+            newXSpeed = math.clamp(newXSpeed, maxSpeed * -1, maxSpeed); // Making sure you don't exceed your maximum speed
             if (isTouchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
             rb.velocity = new Vector2(newXSpeed, Mathf.Max(rb.velocity.y, termialFallingSpeed)); // Updating the speed
             //rb.velocity = new Vector2(newXSpeed, termialFallingSpeed);
         }
 
-        UpdateMaxSpeedReachable(math.abs(rb.velocity.x) > lastSpeed);
+        UpdatemaxSpeed(math.abs(rb.velocity.x) > lastSpeed);
     }
 
-    void UpdateMaxSpeedReachable(bool isAccelerationg)
+    void UpdatemaxSpeed(bool isAccelerationg)
     {
         if (!isAccelerationg)
         {
             // Decrease the maxSpeed depending on the curent speed
-            maxSpeedReachable = math.clamp(math.abs(rb.velocity.x) + 3, initialMaxSpeed, maxSpeedReachable);
+            if (rb.velocity.x * Orientation < maxSpeed && maxSpeed > initialMaxSpeed)
+            {
+                maxSpeed -= Time.deltaTime;
+            }
+            if (maxSpeed < initialMaxSpeed) maxSpeed = initialMaxSpeed;
         }
     }
 
@@ -356,7 +364,7 @@ public class PlayerMovement : MonoBehaviour
     void Jump()
     {
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        maxSpeedReachable += 2;
+        maxSpeed += 2;
     }
 
     void WallJump()
@@ -368,7 +376,7 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             float moveX = Orientation;
-            rb.velocity = new Vector2((maxSpeedReachable - 5) * -moveX, jumpForce);
+            rb.velocity = new Vector2((maxSpeed - 5) * -moveX, jumpForce);
         }
         speedBuffer = 0;
     }
@@ -377,7 +385,7 @@ public class PlayerMovement : MonoBehaviour
     {
         float moveX = Orientation;
         rb.velocity = new Vector2((speedBuffer + boostPerfectWallJump) * -moveX, jumpForce);
-        maxSpeedReachable = speedBuffer + 5;
+        maxSpeed = speedBuffer + 5;
     }
 
     void BufferTheSpeed()
@@ -413,7 +421,7 @@ public class PlayerMovement : MonoBehaviour
     {
         Teleport(respawnPoint);
         rb.velocity = Vector2.zero; // Set all speeds to 0
-        maxSpeedReachable = initialMaxSpeed;
+        maxSpeed = initialMaxSpeed;
     }
 
     public void Teleport(Vector2 coords)
@@ -423,12 +431,12 @@ public class PlayerMovement : MonoBehaviour
 
     public void increaseMaxSpeed(float deltaSpeed)
     {
-        maxSpeedReachable += deltaSpeed;
+        maxSpeed += deltaSpeed;
         updateAcceleration();
     }
 
     void updateAcceleration()
     {
-        acceleration = maxSpeedReachable / 10; // If high speed, it's still reachable
+        acceleration = maxSpeed / 10; // If high speed, it's still reachable
     }
 }
