@@ -5,41 +5,55 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    private Rigidbody2D rb;
+    private Animator animator;
 
-    [Header("Movements")]
-
-
-
-    public float acceleration;                      // "Speed" at wich you reach your maximum speed
-    public float airControlFactor = 0.002f;         // Amount of control in the air (0 = no control, 1 = full control)
+    [Header("Jump")]
     public float jumpHeight = 20f;                  // Hight of a jump
     public float jumpRatio = 10f;                   // True force of the jump
-    private float jumpForce;                        // Variable for unity to use
-    private Rigidbody2D rb;
+    public float airControlFactor = 0.002f;         // Amount of control in the air (0 = no control, 1 = full control)
     public bool isGrounded;                         // 1 when on the ground. 0 when not
-    public bool isTouchingWall;                     // If the player is touching a wall
+    private float jumpForce;                        // Variable for unity to use
+
+    [Header("Speed")]
     public float maxSpeedReachable;                 // Max speed reachable right now. Will change a lot (every time you do something to accelerate)
+    public float acceleration;                      // "Speed" at wich you reach your maximum speed
+    private float speedBuffer;                       // Use to keep in memory a speed
     private float initialMaxSpeed = 20f;
-    public float speedBuffer;                       // Use to keep in memory a speed
+
+    [Header("JumpWall")]
+    public bool isTouchingWall;                     // If the player is touching a wall
     private float wallTouchTime;                    // Last time the wall was touch
     public float wallJumpWindow = 3f;               // Time you have to do a perfect wall jump
-    public WallCheckScript rightSide;
-    public WallCheckScript leftSide;
+    [SerializeField]
+    private WallCheckScript rightSide;
+    [SerializeField]
+    private WallCheckScript leftSide;
 
-    public bool canAttack = false;
-    public float attackCD = 1f;
-    public float curAttackCD = 0f;
+    [Header("Dash")]
+    public bool canDash = true;
+    public float dashTime = 0.5f;                   //Duration of a dash
+    public float dashRange = 2f;
+    public float dashCD = 3f;
+    public float curDashCD = 3f;
+
+    [Header("Attack")]
+    public bool canAttack = false;                  //Boolean to know if the player can attack
+    public float attackCD = 1f;                     //Cooldown of the attack
+    private float curAttackCD = 0f;                 //Timer until next attack
+    public float attackDistance = 5f;               //Maximum distance where the player can attach
+
+    [Header("Enemies")]
     public float detectionRadius = 10f;             // Radius to check for enemies
     public LayerMask enemyLayer;                    // Layer mask for enemies
     private GameObject nearestEnemy;                // Nearest enemy detected
-    public float attackDistance = 5f;
-    public float dashTime = 0.5f;
 
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>(); // Initialization
-        maxSpeedReachable = initialMaxSpeed; // Initialize your max speed
+        animator = GetComponent<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+        maxSpeedReachable = initialMaxSpeed;//Max speed init
         // !HAVE TO BE AFTER THE MAX SPEED INITIALIZATION!
         updateAcceleration(); // Initialize the acceleration based on your current max speed
         UpdateJumpForce(rb.gravityScale);
@@ -62,14 +76,45 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        float dt = Time.deltaTime;
+        //HandleAction(dt);
         isTouchingWall = IsTouchingWall();
-        HandleMovement(); 
-
+        HandleMovement();
         HandleJump();
-        DetectNearestEnemy();
-        HandleAttack();
+        //DetectNearestEnemy();
+        //HandleAttack();
+        //HandleDash();
+        Flip();
+        animator.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
     }
 
+    private void Flip()
+    {
+        if (rb.velocity.x > 0.1f) GetComponent<SpriteRenderer>().flipX = false;
+        else if (rb.velocity.x < -0.1f) GetComponent<SpriteRenderer>().flipX = true;
+    }
+
+    /*private void HandleAction(float dt)
+    {
+        //curAttackCD += dt;
+        if (curDashCD <= dashCD) curDashCD += dt;
+        if (curDashCD >= dashCD && !canDash)
+        {
+            canDash = true;
+            curDashCD = 0f;
+        }
+    }
+    
+    private void HandleDash()
+    {
+
+        if (canDash && Input.GetKeyDown(KeyCode.R))
+        {
+            canDash = false;
+            DashToward(Vector2.right, dashRange, dashTime);
+        }
+    }
+    
     private void HandleAttack()
     {
         if (!canAttack)
@@ -81,34 +126,33 @@ public class PlayerMovement : MonoBehaviour
                 canAttack = true;
             }
         }
-        else if (Input.GetKey(KeyCode.E) && nearestEnemy != null)
+        else if (Input.GetKeyDown(KeyCode.E) && nearestEnemy != null)
         {
             Vector2 enemyPos = nearestEnemy.transform.position;
             Destroy(nearestEnemy);
-            StartCoroutine(DashToward(enemyPos,attackDistance));
+            //DashToward(enemyPos, attackDistance,);
             canAttack = false;
         }
     }
 
-    private IEnumerator DashToward(Vector2 direction, float distance)
+    private void DashToward(Vector2 direction, float distance, float dashTime)
     {
-        float elapsedTime = 0f; // Tracks the time elapsed during the dash
-        Vector2 startPosition = transform.position; // Player's starting position
-        Vector2 targetPosition = startPosition + direction.normalized * distance; // Target position to dash toward
+        Vector2 startPosition = transform.position;
+        Vector2 targetPosition = startPosition + direction.normalized * distance;
+        float elapsedTime = 0f;
 
         while (elapsedTime < dashTime)
         {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / dashTime; // Normalized time (0 to 1)
+            elapsedTime += Time.deltaTime; // Increment the elapsed time
+            float t = elapsedTime / dashTime; // Normalized time (from 0 to 1)
 
-            // Move the player smoothly toward the target position
+            // Interpolate the player's position between the start and target
             transform.position = Vector2.Lerp(startPosition, targetPosition, t);
-
-            yield return null; // Wait until the next frame
         }
 
-        // Ensure the player ends up exactly at the target position
+        // Ensure the final position is exactly at the target after the loop
         transform.position = targetPosition;
+        //rb.AddForce(Vector2.right,ForceMode2D.Impulse);
     }
 
     private void DetectNearestEnemy()
@@ -144,6 +188,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else Debug.Log("No enemy around");
     }
+    */
 
     void HandleMovement()
     {
@@ -160,7 +205,7 @@ public class PlayerMovement : MonoBehaviour
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
             rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
         }
-        else if (isTouchingWall) 
+        else if (isTouchingWall)
         {
             rb.gravityScale = 0;
             rb.velocity = new Vector2(rb.velocity.x, 0);
@@ -169,7 +214,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 rb.velocity = new Vector2(rb.velocity.x, -5); // Move downwards if the player presses down (optional)
             }
-        } 
+        }
         else // If in the air
         {
             rb.gravityScale = 7;
@@ -221,7 +266,7 @@ public class PlayerMovement : MonoBehaviour
         {
             return -1;
         }
-        else 
+        else
         {
             return 1;
         }
