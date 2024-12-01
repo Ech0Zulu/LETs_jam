@@ -26,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
     private float initialMaxSpeed = 20f;
     public float boostPerfectWallJump = 2f;
     public float termialFallingSpeed = -20f;
+    public float ultimateMaxSpeed = 100f;           // The maxSpeed max
     public float FLOW = 0f;                         // FLOW of the player
 
     [Header("JumpWall")]
@@ -173,6 +174,7 @@ public class PlayerMovement : MonoBehaviour
                 );
             // direction = (Orientation == -1)?Vector2.left:Vector2.right;
             StartCoroutine(DashCoroutine(direction, dashRange, dashTime)); // Dash
+            maxSpeed += 5;
         }
     }
     
@@ -199,6 +201,7 @@ public class PlayerMovement : MonoBehaviour
                 Vector2 direction = (enemyPos - (Vector2)transform.position).normalized;
                 rb.velocity = direction * (playerSpeed + 5);
                 StartCoroutine(DashCoroutine(enemyPos - (Vector2)transform.position, dashRange, dashTime));
+                maxSpeed += 10;
                 canAttack = false;
                 nearestEnemy = null;
             }
@@ -364,7 +367,7 @@ public class PlayerMovement : MonoBehaviour
             // Decrease the maxSpeed depending on the curent speed
             if (rb.velocity.x * Orientation < maxSpeed && maxSpeed > initialMaxSpeed)
             {
-                maxSpeed -= Time.deltaTime;
+                maxSpeed -= Time.deltaTime * 5;
             }
             if (maxSpeed < initialMaxSpeed) maxSpeed = initialMaxSpeed;
         }
@@ -413,7 +416,7 @@ public class PlayerMovement : MonoBehaviour
     {
         float moveX = Orientation;
         rb.velocity = new Vector2((speedBuffer + boostPerfectWallJump) * -moveX, jumpForce);
-        maxSpeed = speedBuffer + 5;
+        maxSpeed = speedBuffer + 10;
     }
 
     void BufferTheSpeed()
