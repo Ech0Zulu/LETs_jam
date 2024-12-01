@@ -149,7 +149,7 @@ public class PlayerMovement : MonoBehaviour
                 Input.GetAxis("Horizontal") > 0 ? 1 : Input.GetAxis("Horizontal") < 0 ? -1 : 0,
                 Input.GetAxis("Vertical") > 0 ? 1 : Input.GetAxis("Vertical") < 0 ? -1 : 0
                 );
-            direction = (Orientation == -1)?Vector2.left:Vector2.right;
+            if (direction == Vector2.zero)direction = (Orientation == -1)?Vector2.left:Vector2.right;
             StartCoroutine(DashCoroutine(direction, dashRange, dashTime)); // Dash
         }
     }
