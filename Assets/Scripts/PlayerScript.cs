@@ -15,7 +15,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpHeight = 20f;                  // Hight of a jump
     public float jumpRatio = 10f;                   // True force of the jump
     public float airControlFactor = 0.002f;         // Amount of control in the air (0 = no control, 1 = full control)
-    public bool grounded;                         // 1 when on the ground. 0 when not
+    public bool isGrounded;                         // 1 when on the ground. 0 when not
     private float jumpForce;                        // Variable for unity to use
 
     [Header("Speed")]
@@ -26,7 +26,7 @@ public class PlayerMovement : MonoBehaviour
     public float boostPerfectWallJump = 2f;
 
     [Header("JumpWall")]
-    public bool touchingWall;                     // If the player is touching a wall
+    public bool isTouchingWall;                     // If the player is touching a wall
     private float wallTouchTime;                    // Last time the wall was touch
     public float wallJumpWindow = 3f;               // Time you have to do a perfect wall jump
     public float checkRadius = 0.2f;            // Radius of the circle for wall detection
@@ -79,8 +79,8 @@ public class PlayerMovement : MonoBehaviour
     {
         float dt = Time.deltaTime;
         //HandleAction(dt);
-        touchingWall = IsTouchingWall();
-        grounded = IsGrounded();
+        isTouchingWall = IsTouchingWall();
+        isGrounded = IsGrounded();
         BufferTheSpeed();
         HandleMovement();
         HandleJump();
@@ -88,7 +88,16 @@ public class PlayerMovement : MonoBehaviour
         //HandleAttack();
         //HandleDash();
         Flip();
-        animator.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
+        HandleAnimator();
+    }
+
+    private void HandleAnimator()
+    {
+        //Debug.Log(Mathf.Abs(rb.velocity.x) + " " + Mathf.Abs(rb.velocity.y) + " " + isGrounded);
+        animator.SetFloat("XSpeed", Mathf.Abs(rb.velocity.x));
+        animator.SetFloat("YSpeed", Mathf.Abs(rb.velocity.y));
+        animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isTouchingWall", isTouchingWall);
     }
 
     private void Flip()
@@ -104,8 +113,8 @@ public class PlayerMovement : MonoBehaviour
         else if (rb.velocity.x < -0.1f) GetComponent<SpriteRenderer>().flipX = true;
         */
     }
-
-    /*private void HandleAction(float dt)
+    /*
+    private void HandleAction(float dt)
     {
         //curAttackCD += dt;
         if (curDashCD <= dashCD) curDashCD += dt;
@@ -207,32 +216,20 @@ public class PlayerMovement : MonoBehaviour
 
         float lastSpeed = math.abs(rb.velocity.x);
 
-        if (grounded)
+        if (isGrounded)
         {
             rb.gravityScale = 7;
             float newXSpeed = rb.velocity.x + moveX * acceleration; // Increasing gradualy the speed depending on your acceleration
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
-            if (touchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
+            if (isTouchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
             rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
-        }/*
-        else if (isTouchingWall)
-        {
-
-
-            rb.gravityScale = 0;
-            rb.velocity = new Vector2(rb.velocity.x, 0);
-            // If the player is touching the wall, stop vertical movement
-            if (Input.GetAxis("Vertical") < 0)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, -5); // Move downwards if the player presses down (optional)
-            }
-        }*/
+        }
         else // If in the air
         {
             rb.gravityScale = 7;
             float newXSpeed = rb.velocity.x + moveX * acceleration * airControlFactor; // Increasing gradualy the speed depending on your acceleration. The acceleration is diminued by airControlFactor cause the player is in the air
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
-            if (touchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
+            if (isTouchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
             rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
         }
 
@@ -250,11 +247,11 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && grounded && !touchingWall) // If space pressed and player on the ground
+        if (Input.GetButtonDown("Jump") && isGrounded && !isTouchingWall) // If space pressed and player on the ground
         {
             Jump();
         }
-        else if (Input.GetButtonDown("Jump") && touchingWall) // If space pressed and player on the ground
+        else if (Input.GetButtonDown("Jump") && isTouchingWall) // If space pressed and player on the ground
         {
             WallJump();
         }
@@ -289,7 +286,7 @@ public class PlayerMovement : MonoBehaviour
 
     void BufferTheSpeed()
     {
-        if (touchingWall && speedBuffer == 0) // First frame the player touch a wall
+        if (isTouchingWall && speedBuffer == 0) // First frame the player touch a wall
         {
             speedBuffer = math.abs(rb.velocity.x); // Keep in memory the speed at which the player hit the wall
             wallTouchTime = Time.time; // Keep in memory the time when the player hit the wall
