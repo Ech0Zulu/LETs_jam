@@ -50,9 +50,9 @@ public class PlayerMovement : MonoBehaviour
     public float attackCD = 1f;                     //Cooldown of the attack
     private float curAttackCD = 0f;                 //Timer until next attack
     public float attackDistance = 5f;               //Maximum distance where the player can attach
+    public bool isAttacking = false;
 
     [Header("Enemies")]
-    public float detectionRadius = 10f;             // Radius to check for enemies
     public LayerMask enemyLayer;                    // Layer mask for enemies
     private GameObject nearestEnemy;                // Nearest enemy detected
 
@@ -89,8 +89,8 @@ public class PlayerMovement : MonoBehaviour
             BufferTheSpeed();
             HandleMovement();
             HandleJump();
-            //DetectNearestEnemy();
-            //HandleAttack();
+            DetectNearestEnemy();
+            HandleAttack();
         }
         Flip();
         HandleAnimator();
@@ -103,6 +103,7 @@ public class PlayerMovement : MonoBehaviour
         animator.SetFloat("YSpeed", Mathf.Abs(rb.velocity.y));
         animator.SetBool("isGrounded", isGrounded);
         animator.SetBool("isTouchingWall", isTouchingWall);
+        animator.SetBool("isDashing",isDashing);
     }
 
     private void Flip()
@@ -141,7 +142,7 @@ public class PlayerMovement : MonoBehaviour
     
     private void HandleAttack()
     {
-        if (!canAttack)
+        /*if (!canAttack)
         {
             curAttackCD += Time.deltaTime;
             if (curAttackCD >= attackCD)
@@ -149,13 +150,18 @@ public class PlayerMovement : MonoBehaviour
                 curAttackCD = 0f;
                 canAttack = true;
             }
-        }
-        else if (Input.GetKeyDown(KeyCode.E) && nearestEnemy != null)
+        }*/
+        if (Input.GetMouseButtonDown(1))
         {
-            Vector2 enemyPos = nearestEnemy.transform.position;
-            Destroy(nearestEnemy);
-            //DashToward(enemyPos, attackDistance,);
-            canAttack = false;
+            Debug.Log("BANZAI !");
+            if (nearestEnemy != null)
+            {
+                Vector2 enemyPos = nearestEnemy.transform.position;
+
+                StartCoroutine(DashCoroutine(Vector2.up, dashRange, dashTime));
+                canAttack = false;
+                nearestEnemy = null;
+            }
         }
     }
 
@@ -190,7 +196,7 @@ public class PlayerMovement : MonoBehaviour
     private void DetectNearestEnemy()
     {
         // Detect all enemies within the detection radius
-        Collider2D[] detectedEnemies = Physics2D.OverlapCircleAll(transform.position, detectionRadius, enemyLayer);
+        Collider2D[] detectedEnemies = Physics2D.OverlapCircleAll(transform.position, attackDistance, enemyLayer);
 
         float shortestDistance = Mathf.Infinity;
         nearestEnemy = null;
@@ -202,6 +208,7 @@ public class PlayerMovement : MonoBehaviour
         {
             foreach (Collider2D enemy in detectedEnemies)
             {
+                Debug.Log(enemy.name);
                 if (enemy.CompareTag("Enemy"))
                 {
                     Debug.Log("Enemy found : " + enemy.gameObject.name);
