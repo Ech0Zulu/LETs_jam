@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     private float speedBuffer = 0;                       // Use to keep in memory a speed
     private float initialMaxSpeed = 20f;
     public float boostPerfectWallJump = 2f;
+    public float termialFallingSpeed = -20f;
 
     [Header("JumpWall")]
     public bool isTouchingWall;                     // If the player is touching a wall
@@ -96,6 +97,16 @@ public class PlayerMovement : MonoBehaviour
         HandleAnimator();
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Check if the player is dashing and collides with an enemy
+        if (isAttacking && collision.gameObject.CompareTag("Enemy"))
+        {
+            isAttacking = false;
+            Destroy(collision.gameObject); // Destroy the enemy
+        }
+    }
+
     private void HandleAnimator()
     {
         //Debug.Log(Mathf.Abs(rb.velocity.x) + " " + Mathf.Abs(rb.velocity.y) + " " + isGrounded);
@@ -104,6 +115,7 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("isGrounded", isGrounded);
         animator.SetBool("isTouchingWall", isTouchingWall);
         animator.SetBool("isDashing",isDashing);
+        animator.SetBool("isAttacking",isAttacking);
     }
 
     private void Flip()
@@ -137,6 +149,7 @@ public class PlayerMovement : MonoBehaviour
                 Input.GetAxis("Horizontal") > 0 ? 1 : Input.GetAxis("Horizontal") < 0 ? -1 : 0,
                 Input.GetAxis("Vertical") > 0 ? 1 : Input.GetAxis("Vertical") < 0 ? -1 : 0
                 );
+            direction = (Orientation == -1)?Vector2.left:Vector2.right;
             StartCoroutine(DashCoroutine(direction, dashRange, dashTime)); // Dash
         }
     }
@@ -158,8 +171,9 @@ public class PlayerMovement : MonoBehaviour
             if (nearestEnemy != null)
             {
                 Vector2 enemyPos = nearestEnemy.transform.position;
-
-                StartCoroutine(DashCoroutine(Vector2.up, dashRange, dashTime));
+                isAttacking = true;
+                Debug.Log(enemyPos);
+                StartCoroutine(DashCoroutine(enemyPos - (Vector2)transform.position, dashRange, dashTime));
                 canAttack = false;
                 nearestEnemy = null;
             }
@@ -221,7 +235,10 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator DashCoroutine(Vector2 direction, float distance, float dashTime)
     {
-        isDashing = true;
+        if (!isAttacking)
+        {
+            isDashing = true;
+        }
 
         curDashCD = dashCD;
 
@@ -250,6 +267,7 @@ public class PlayerMovement : MonoBehaviour
         transform.position = targetPosition;
         rb.velocity = bufferSpeed; // Give back the speed to the player
         isDashing = false;
+        isAttacking = false;
     }
 
     private void DetectNearestEnemy()
@@ -307,7 +325,8 @@ public class PlayerMovement : MonoBehaviour
             float newXSpeed = rb.velocity.x + moveX * acceleration * airControlFactor; // Increasing gradualy the speed depending on your acceleration. The acceleration is diminued by airControlFactor cause the player is in the air
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
             if (isTouchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
-            rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
+            rb.velocity = new Vector2(newXSpeed, Mathf.Max(rb.velocity.y, termialFallingSpeed)); // Updating the speed
+            //rb.velocity = new Vector2(newXSpeed, termialFallingSpeed);
         }
 
         UpdateMaxSpeedReachable(math.abs(rb.velocity.x) > lastSpeed);
