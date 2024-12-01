@@ -26,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
     private float initialMaxSpeed = 20f;
     public float boostPerfectWallJump = 2f;
     public float termialFallingSpeed = -20f;
+    public float ultimateMaxSpeed = 100f;           // The maxSpeed max
     public float FLOW = 0f;                         // FLOW of the player
 
     [Header("JumpWall")]
@@ -58,6 +59,12 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask enemyLayer;                    // Layer mask for enemies
     private GameObject nearestEnemy;                // Nearest enemy detected
 
+    [Header("ToSort")]
+    public float timeGrounded = 0f;
+    public float timeNotGrounded = 0f;
+    public float coyoteMaxTime = 0.1f; // Max coyote time in seconds. Timing when the player is still able to jump even if not grounded
+    public float jumpWindow = 0.1f; // Time you have to do a perfect jump
+    public float perfectJumpSpeedGain = 2f;
 
     void Start()
     {
@@ -89,6 +96,7 @@ public class PlayerMovement : MonoBehaviour
         float dt = Time.deltaTime;
         isTouchingWall = IsTouchingWall();
         isGrounded = IsGrounded();
+        updateGroundedOrNotTime();
         HandleDash();
         if (!isDashing)
         {
@@ -101,6 +109,20 @@ public class PlayerMovement : MonoBehaviour
         Flip();
         HandleAnimator();
         UpdateFLOW();
+    }
+
+    void updateGroundedOrNotTime()
+    {
+        if (isGrounded)
+        {
+            timeGrounded += Time.deltaTime;
+            timeNotGrounded = 0;
+        }
+        else
+        {
+            timeNotGrounded += Time.deltaTime;
+            timeGrounded = 0;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -152,6 +174,7 @@ public class PlayerMovement : MonoBehaviour
                 );
             if(direction == Vector2.zero) direction = (Orientation == 1) ? Vector2.right : Vector2.left;
             StartCoroutine(DashCoroutine(direction, dashRange, dashTime)); // Dash
+            maxSpeed += 5;
         }
     }
     
@@ -178,6 +201,7 @@ public class PlayerMovement : MonoBehaviour
                 Vector2 direction = (enemyPos - (Vector2)transform.position).normalized;
                 rb.velocity = direction * (playerSpeed + 5);
                 StartCoroutine(DashCoroutine(enemyPos - (Vector2)transform.position, dashRange, dashTime));
+                maxSpeed += 10;
                 canAttack = false;
                 nearestEnemy = null;
             }
@@ -347,7 +371,7 @@ public class PlayerMovement : MonoBehaviour
             // Decrease the maxSpeed depending on the curent speed
             if (rb.velocity.x * Orientation < maxSpeed && maxSpeed > initialMaxSpeed)
             {
-                maxSpeed -= Time.deltaTime;
+                maxSpeed -= Time.deltaTime * 5;
             }
             if (maxSpeed < initialMaxSpeed) maxSpeed = initialMaxSpeed;
         }
@@ -355,7 +379,7 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded && !isTouchingWall) // If space pressed and player on the ground
+        if (Input.GetButtonDown("Jump") && (timeNotGrounded <= coyoteMaxTime) && !isTouchingWall) // If space pressed and player on the ground
         {
             Jump();
         }
@@ -367,8 +391,15 @@ public class PlayerMovement : MonoBehaviour
 
     void Jump()
     {
-        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        maxSpeed += 2;
+        if (timeGrounded <= jumpWindow)
+        {
+            rb.velocity = new Vector2(rb.velocity.x + perfectJumpSpeedGain, jumpForce);
+            maxSpeed += perfectJumpSpeedGain;
+        }
+        else
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
     }
 
     void WallJump()
@@ -389,7 +420,7 @@ public class PlayerMovement : MonoBehaviour
     {
         float moveX = Orientation;
         rb.velocity = new Vector2((speedBuffer + boostPerfectWallJump) * -moveX, jumpForce);
-        maxSpeed = speedBuffer + 5;
+        maxSpeed = speedBuffer + 10;
     }
 
     void BufferTheSpeed()
