@@ -150,7 +150,7 @@ public class PlayerMovement : MonoBehaviour
                 Input.GetAxis("Horizontal") > 0 ? 1 : Input.GetAxis("Horizontal") < 0 ? -1 : 0,
                 Input.GetAxis("Vertical") > 0 ? 1 : Input.GetAxis("Vertical") < 0 ? -1 : 0
                 );
-            // direction = (Orientation == -1)?Vector2.left:Vector2.right;
+            if(direction == Vector2.zero) direction = (Orientation == 1) ? Vector2.right : Vector2.left;
             StartCoroutine(DashCoroutine(direction, dashRange, dashTime)); // Dash
         }
     }
@@ -196,6 +196,10 @@ public class PlayerMovement : MonoBehaviour
         if (hit.collider != null)
         {
             // If the ray hits a wall, adjust the target position
+            targetPosition = hit.point - direction.normalized * 0.6f;
+        }
+        else if (hit = Physics2D.Raycast(startPosition, direction, distance, enemyLayer))
+        {
             targetPosition = hit.point - direction.normalized * 0.6f;
         }
         /*
