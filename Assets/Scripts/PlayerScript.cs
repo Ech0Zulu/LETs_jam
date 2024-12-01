@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -15,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
     public float jumpHeight = 20f;                  // Hight of a jump
     public float jumpRatio = 10f;                   // True force of the jump
     public float airControlFactor = 0.002f;         // Amount of control in the air (0 = no control, 1 = full control)
-    public bool grounded;                         // 1 when on the ground. 0 when not
+    public bool isGrounded;                         // 1 when on the ground. 0 when not
     private float jumpForce;                        // Variable for unity to use
 
     [Header("Speed")]
@@ -26,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
     public float boostPerfectWallJump = 2f;
 
     [Header("JumpWall")]
-    public bool touchingWall;                     // If the player is touching a wall
+    public bool isTouchingWall;                     // If the player is touching a wall
     private float wallTouchTime;                    // Last time the wall was touch
     public float wallJumpWindow = 3f;               // Time you have to do a perfect wall jump
     public float checkRadius = 0.2f;            // Radius of the circle for wall detection
@@ -37,9 +38,10 @@ public class PlayerMovement : MonoBehaviour
     private Transform groundCheck;
 
     [Header("Dash")]
+    public bool isDashing = false;
     public bool canDash = true;
     public float dashTime = 0.5f;                   //Duration of a dash
-    public float dashRange = 2f;
+    public float dashRange = 10f;
     public float dashCD = 3f;
     public float curDashCD = 3f;
 
@@ -59,7 +61,7 @@ public class PlayerMovement : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
-        maxSpeedReachable = initialMaxSpeed;//Max speed init
+        maxSpeedReachable = initialMaxSpeed; //Max speed init
         // !HAVE TO BE AFTER THE MAX SPEED INITIALIZATION!
         updateAcceleration(); // Initialize the acceleration based on your current max speed
         UpdateJumpForce(rb.gravityScale);
@@ -78,15 +80,18 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         float dt = Time.deltaTime;
-        //HandleAction(dt);
-        touchingWall = IsTouchingWall();
-        grounded = IsGrounded();
-        BufferTheSpeed();
-        HandleMovement();
-        HandleJump();
-        //DetectNearestEnemy();
-        //HandleAttack();
-        //HandleDash();
+        isTouchingWall = IsTouchingWall();
+        isGrounded = IsGrounded();
+        HandleAction(dt);
+        HandleDash();
+        if (!isDashing)
+        {
+            BufferTheSpeed();
+            HandleMovement();
+            HandleJump();
+            //DetectNearestEnemy();
+            //HandleAttack();
+        }
         Flip();
         animator.SetFloat("Speed", Mathf.Abs(rb.velocity.x));
     }
@@ -99,30 +104,29 @@ public class PlayerMovement : MonoBehaviour
         Vector3 newScale = transform.localScale;
         newScale.x = Orientation;
         transform.localScale = newScale;
-        /*
-        if (rb.velocity.x > 0.1f) GetComponent<SpriteRenderer>().flipX = false;
-        else if (rb.velocity.x < -0.1f) GetComponent<SpriteRenderer>().flipX = true;
-        */
     }
 
-    /*private void HandleAction(float dt)
+    private void HandleAction(float dt)
     {
-        //curAttackCD += dt;
-        if (curDashCD <= dashCD) curDashCD += dt;
-        if (curDashCD >= dashCD && !canDash)
-        {
-            canDash = true;
-            curDashCD = 0f;
-        }
+        if (curDashCD <= 0) curDashCD -= dt;
+        if (curDashCD < 0) curDashCD = 0;
+    }
+
+    private bool CanDash()
+    {
+        return curDashCD == 0;
     }
     
     private void HandleDash()
     {
-
-        if (canDash && Input.GetKeyDown(KeyCode.R))
+        if (/*CanDash() && */(Input.GetMouseButtonDown(0)))
         {
-            canDash = false;
-            DashToward(Vector2.right, dashRange, dashTime);
+            // Get one of the 8 direction possible depending on ZQSD/WASD
+            Vector2 direction = new Vector2(
+                Input.GetAxis("Horizontal") > 0 ? 1 : Input.GetAxis("Horizontal") < 0 ? -1 : 0,
+                Input.GetAxis("Vertical") > 0 ? 1 : Input.GetAxis("Vertical") < 0 ? -1 : 0
+                );
+            StartCoroutine(DashCoroutine(direction, dashRange, dashTime)); // Dash
         }
     }
     
@@ -146,10 +150,16 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void DashToward(Vector2 direction, float distance, float dashTime)
+    private IEnumerator DashCoroutine(Vector2 direction, float distance, float dashTime)
     {
+        isDashing = true;
+
+        Vector2 bufferSpeed = rb.velocity; // Remeber the speed of the player before the dash
+        rb.velocity = new Vector2(0,0);
+
         Vector2 startPosition = transform.position;
-        Vector2 targetPosition = startPosition + direction.normalized * distance;
+        Vector2 targetPosition = startPosition + direction * distance;
+        
         float elapsedTime = 0f;
 
         while (elapsedTime < dashTime)
@@ -159,11 +169,13 @@ public class PlayerMovement : MonoBehaviour
 
             // Interpolate the player's position between the start and target
             transform.position = Vector2.Lerp(startPosition, targetPosition, t);
-        }
 
+            yield return null; // Wait for the next frame
+        }
         // Ensure the final position is exactly at the target after the loop
         transform.position = targetPosition;
-        //rb.AddForce(Vector2.right,ForceMode2D.Impulse);
+        rb.velocity = bufferSpeed; // Give back the speed to the player
+        isDashing = false;
     }
 
     private void DetectNearestEnemy()
@@ -199,7 +211,6 @@ public class PlayerMovement : MonoBehaviour
         }
         else Debug.Log("No enemy around");
     }
-    */
 
     void HandleMovement()
     {
@@ -207,12 +218,12 @@ public class PlayerMovement : MonoBehaviour
 
         float lastSpeed = math.abs(rb.velocity.x);
 
-        if (grounded)
+        if (isGrounded)
         {
             rb.gravityScale = 7;
             float newXSpeed = rb.velocity.x + moveX * acceleration; // Increasing gradualy the speed depending on your acceleration
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
-            if (touchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
+            if (isTouchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
             rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
         }/*
         else if (isTouchingWall)
@@ -232,7 +243,7 @@ public class PlayerMovement : MonoBehaviour
             rb.gravityScale = 7;
             float newXSpeed = rb.velocity.x + moveX * acceleration * airControlFactor; // Increasing gradualy the speed depending on your acceleration. The acceleration is diminued by airControlFactor cause the player is in the air
             newXSpeed = math.clamp(newXSpeed, maxSpeedReachable * -1, maxSpeedReachable); // Making sure you don't exceed your maximum speed
-            if (touchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
+            if (isTouchingWall && newXSpeed * Orientation > 0) newXSpeed = 0;
             rb.velocity = new Vector2(newXSpeed, rb.velocity.y); // Updating the speed
         }
 
@@ -250,11 +261,11 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && grounded && !touchingWall) // If space pressed and player on the ground
+        if (Input.GetButtonDown("Jump") && isGrounded && !isTouchingWall) // If space pressed and player on the ground
         {
             Jump();
         }
-        else if (Input.GetButtonDown("Jump") && touchingWall) // If space pressed and player on the ground
+        else if (Input.GetButtonDown("Jump") && isTouchingWall) // If space pressed and player on the ground
         {
             WallJump();
         }
@@ -289,7 +300,7 @@ public class PlayerMovement : MonoBehaviour
 
     void BufferTheSpeed()
     {
-        if (touchingWall && speedBuffer == 0) // First frame the player touch a wall
+        if (isTouchingWall && speedBuffer == 0) // First frame the player touch a wall
         {
             speedBuffer = math.abs(rb.velocity.x); // Keep in memory the speed at which the player hit the wall
             wallTouchTime = Time.time; // Keep in memory the time when the player hit the wall

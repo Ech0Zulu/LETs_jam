@@ -740,6 +740,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2450991239077950965, guid: 28cee2d837dc84a4d8e7e272924f7377, type: 3}
+      propertyPath: dashRange
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 2450991239077950965, guid: 28cee2d837dc84a4d8e7e272924f7377, type: 3}
       propertyPath: groundCheck
       value: 
       objectReference: {fileID: 737072586}
