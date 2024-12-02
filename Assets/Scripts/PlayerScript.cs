@@ -423,7 +423,7 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && (timeNotGrounded <= coyoteMaxTime) && !isTouchingWall) // If space pressed and player on the ground
+        if (Input.GetButtonDown("Jump") && (timeNotGrounded <= coyoteMaxTime)) // If space pressed and player on the ground
         {
             Jump();
         }
