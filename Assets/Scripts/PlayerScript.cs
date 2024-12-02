@@ -183,10 +183,14 @@ public class PlayerMovement : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         // Check if the player is dashing and collides with an enemy
-        if (isAttacking && collision.gameObject.CompareTag("Enemy"))
+        if (collision.gameObject.CompareTag("Enemy"))
         {
-            isAttacking = false;
-            Destroy(collision.gameObject);
+            if (isAttacking)
+            {
+                isAttacking = false;
+                Destroy(collision.gameObject);
+            }
+            else TakeDamage(collision.transform.position);
         }
     }
 

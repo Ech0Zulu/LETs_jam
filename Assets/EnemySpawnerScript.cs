@@ -6,14 +6,14 @@ public class EnemySpawnerScript : MonoBehaviour
 {
     [SerializeField]
     private GameObject enemyPrefab;
-    private GameObject enemy;
+    public GameObject enemy;
     public float curRespawnTime = 0f;
     public float respawnTime = 5f;
     public bool isDead;
 
     private bool IsDead()
     {
-        return (enemy != null);
+        return (enemy == null);
     }
 
     // Start is called before the first frame update
