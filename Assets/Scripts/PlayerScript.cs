@@ -148,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Flip()
     {
-        if (rb.velocity.x > 0.1f) Orientation = 1; 
+        if (rb.velocity.x > 0.1f) Orientation = 1;
         else if (rb.velocity.x < -0.1f) Orientation = -1;
 
         Vector3 newScale = transform.localScale;
@@ -160,7 +160,7 @@ public class PlayerMovement : MonoBehaviour
     {
         return curDashCD == 0;
     }
-    
+
     private void HandleDash()
     {
         if (curDashCD > 0) curDashCD -= Time.deltaTime;
@@ -172,12 +172,12 @@ public class PlayerMovement : MonoBehaviour
                 Input.GetAxis("Horizontal") > 0 ? 1 : Input.GetAxis("Horizontal") < 0 ? -1 : 0,
                 Input.GetAxis("Vertical") > 0 ? 1 : Input.GetAxis("Vertical") < 0 ? -1 : 0
                 );
-            if(direction == Vector2.zero) direction = (Orientation == 1) ? Vector2.right : Vector2.left;
+            if (direction == Vector2.zero) direction = (Orientation == 1) ? Vector2.right : Vector2.left;
             StartCoroutine(DashCoroutine(direction, dashRange, dashTime)); // Dash
             maxSpeed += 5;
         }
     }
-    
+
     private void HandleAttack()
     {
         /*if (!canAttack)
@@ -222,10 +222,7 @@ public class PlayerMovement : MonoBehaviour
             // If the ray hits a wall, adjust the target position
             targetPosition = hit.point - direction.normalized * 0.6f;
         }
-        else if (hit = Physics2D.Raycast(startPosition, direction, distance, enemyLayer))
-        {
-            targetPosition = hit.point - direction.normalized * 0.6f;
-        }
+        
         /*
         float searchRadius = dashRange; // Rayon de recherche
         float stepSize = 0.5f; // Taille des pas pour la recherche
@@ -275,14 +272,14 @@ public class PlayerMovement : MonoBehaviour
         curDashCD = dashCD;
 
         Vector2 bufferSpeed = rb.velocity; // Remember the speed of the player before the dash
-        rb.velocity = new Vector2(0,0);
+        rb.velocity = new Vector2(0, 0);
 
         Vector2 startPosition = transform.position;
         Vector2 targetPosition;
 
         targetPosition = GetValidTargetPosition(startPosition, direction, distance);
         Debug.DrawLine(startPosition, targetPosition, Color.green, 1f);
-        
+
         float elapsedTime = 0f;
 
         while (elapsedTime < dashTime)
