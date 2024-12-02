@@ -140,6 +140,7 @@ public class PlayerMovement : MonoBehaviour
     {
         float dt = Time.deltaTime;
         
+        wallTouchTime = UpdateTimer(wallTouchTime);
         updateGroundedOrNotTime();
         UpdateDodge();
         if (isDamaged)
@@ -447,7 +448,7 @@ public class PlayerMovement : MonoBehaviour
 
     void WallJump()
     {
-        if (Time.time - wallTouchTime >= wallJumpWindow)
+        if (wallTouchTime > 0)
         {
             PerfectWallJump();
         }
@@ -471,7 +472,7 @@ public class PlayerMovement : MonoBehaviour
         if (isTouchingWall && speedBuffer == 0) // First frame the player touch a wall
         {
             speedBuffer = math.abs(rb.velocity.x); // Keep in memory the speed at which the player hit the wall
-            wallTouchTime = Time.time; // Keep in memory the time when the player hit the wall
+            wallTouchTime = wallJumpWindow; // Keep in memory the time when the player hit the wall
         }
     }
 
