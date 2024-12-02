@@ -198,6 +198,7 @@ MonoBehaviour:
   hudDashAnimator: {fileID: 0}
   hudAttackAnimator: {fileID: 0}
   Orientation: 1
+  finishArea: {fileID: 0}
   jumpHeight: 25
   jumpRatio: 5
   airControlFactor: 0.1
@@ -205,7 +206,7 @@ MonoBehaviour:
   maxSpeed: 0
   acceleration: 0
   boostPerfectWallJump: 2
-  termialFallingSpeed: -20
+  termialFallingSpeed: -35
   ultimateMaxSpeed: 100
   FLOW: 0
   isTouchingWall: 0
@@ -218,7 +219,7 @@ MonoBehaviour:
   groundCheck: {fileID: 3989326267844412115}
   isDashing: 0
   canDash: 0
-  dashTime: 0.5
+  dashTime: 0.1
   dashRange: 10
   dashCD: 3
   curDashCD: 3
@@ -234,11 +235,11 @@ MonoBehaviour:
   dodgeSpeedIncrement: 5
   canAttack: 0
   attackCD: 0.5
-  attackDistance: 5
+  attackDistance: 10
   isAttacking: 0
   enemyLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   damageEjectionPower: 50
   timeGrounded: 0
   timeNotGrounded: 0

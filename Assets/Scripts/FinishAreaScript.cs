@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public class FinishAreaScript : MonoBehaviour
 {
-    private float timer = 0f;
+    public float timer = 0f;
     public bool isRunning = false;
     // Start is called before the first frame update
     void Start()
@@ -28,9 +28,15 @@ public class FinishAreaScript : MonoBehaviour
         }
     }
 
+    public void Reset()
+    {
+        timer = 0;
+    }
+
     public void EndTheGame()
     {
         isRunning = false;
+        FindObjectOfType<LeaderboardManager>().AddTime(timer);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         // CONTINUUU ISHI
     }

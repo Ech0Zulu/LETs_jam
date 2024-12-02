@@ -16,6 +16,7 @@ public class PlayerMovement : MonoBehaviour
     private Animator hudAttackAnimator;
     [SerializeField]
     private float Orientation = 1; // The X scale factor for the player. -1 when faceing left, 1 when facing right
+    public FinishAreaScript finishArea;
 
     [Header("Jump")]
     public float jumpHeight = 20f;                  // Hight of a jump
@@ -523,6 +524,7 @@ public class PlayerMovement : MonoBehaviour
     {
         Teleport(respawnPoint);
         rb.velocity = Vector2.zero; // Set all speeds to 0
+        finishArea.Reset();
         maxSpeed = initialMaxSpeed;
     }
 
