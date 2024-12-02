@@ -83,9 +83,11 @@ public class PlayerMovement : MonoBehaviour
     public float coyoteMaxTime = 0.1f; // Max coyote time in seconds. Timing when the player is still able to jump even if not grounded
     public float jumpWindow = 0.1f; // Time you have to do a perfect jump
     public float perfectJumpSpeedGain = 2f;
+    public GameObject PauseMenu;
 
     void Start()
     {
+        Cursor.visible = false;
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         maxSpeed = initialMaxSpeed; //Max speed init
@@ -139,7 +141,10 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         float dt = Time.deltaTime;
-        
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            PauseMenu.SetActive(true);
+        }
         wallTouchTime = UpdateTimer(wallTouchTime);
         updateGroundedOrNotTime();
         UpdateDodge();
