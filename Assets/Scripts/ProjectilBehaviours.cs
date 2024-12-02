@@ -71,8 +71,10 @@ public class ProjectilBehaviours : MonoBehaviour
         }
 
         //Follow the targe if Aimed type
-        if(type.Equals(Type.Aimed) && Vector2.Distance(transform.position, target.transform.position) > stopAimDistance) {
-            direction = (target.transform.position - transform.position);
+        if (type.Equals(Type.Aimed)){
+            if (Vector2.Distance(transform.position, target.transform.position) > stopAimDistance) {
+                direction = (target.transform.position - transform.position);
+            }
         }
 
         //Move toward the target direction

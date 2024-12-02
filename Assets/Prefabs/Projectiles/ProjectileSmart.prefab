@@ -103,7 +103,7 @@ MonoBehaviour:
   type: 1
   initSpeed: 20
   ttl: 10
-  doAccelerate: 1
+  doAccelerate: 0
   accelerationSpeed: 1
   maxSpeed: 1
   stopAimDistance: 5

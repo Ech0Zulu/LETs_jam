@@ -98,6 +98,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilPrefab: {fileID: 6199679141146632284, guid: 19e3a9d69517ceb459ceca252cda9cdc, type: 3}
-  player: {fileID: 0}
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 64
   attackRange: 16
   attackSpeed: 0.5
