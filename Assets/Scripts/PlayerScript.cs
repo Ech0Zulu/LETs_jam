@@ -321,10 +321,9 @@ public class PlayerMovement : MonoBehaviour
         if (!isAttacking)
         {
             isDashing = true;
+            curDashCD = dashCD;
         }
-
-        curDashCD = dashCD;
-
+        
         Vector2 bufferSpeed = rb.velocity; // Remember the speed of the player before the dash
         rb.velocity = new Vector2(0, 0);
 
