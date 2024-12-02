@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 91cd1cfea012a0544b8feec8113185d4
+guid: dc50533a99f2555418a655ae3b5e8015
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -45,7 +45,7 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 32
@@ -97,7 +97,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Basic Tilemap_0
+      name: Basic Tilemap2 1_0
       rect:
         serializedVersion: 2
         x: 0
@@ -111,14 +111,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bae24cbfc45a32444bb96d269f227263
-      internalID: 908656110
+      spriteID: e6c77f2ca9f9a3b47b5c80e30786f68e
+      internalID: -1519348513
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_1
+      name: Basic Tilemap2 1_1
       rect:
         serializedVersion: 2
         x: 32
@@ -132,14 +132,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d9e3804f652d55a4fb0e7cbef530b44b
-      internalID: -1500210445
+      spriteID: 295109d1a753e9940ad1b2d3396e648e
+      internalID: -1448064477
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_2
+      name: Basic Tilemap2 1_2
       rect:
         serializedVersion: 2
         x: 0
@@ -153,14 +153,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 83d40dd3b9e4dfb4187ef61cdf17e65e
-      internalID: 1227125971
+      spriteID: e5008aa65f69d364c982bcf70d56297e
+      internalID: -1273195425
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_3
+      name: Basic Tilemap2 1_3
       rect:
         serializedVersion: 2
         x: 32
@@ -174,14 +174,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 30140a07518b18f42b9f9c001116a209
-      internalID: 1665698889
+      spriteID: b51217a53bd1c4148a9ebad6328b18a4
+      internalID: 1894556455
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_4
+      name: Basic Tilemap2 1_4
       rect:
         serializedVersion: 2
         x: 0
@@ -195,14 +195,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 45f1b41a48c8f3a479bc38e0d3ac3f2e
-      internalID: -281137706
+      spriteID: 5a376732b7b7f4641a122b6114373807
+      internalID: 694952726
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_5
+      name: Basic Tilemap2 1_5
       rect:
         serializedVersion: 2
         x: 32
@@ -216,14 +216,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b00c8239d2a0f204ab820c6d9a929f53
-      internalID: 1387468457
+      spriteID: 16b1b5605ba48db4c9366bd62cdbc891
+      internalID: 865741014
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_6
+      name: Basic Tilemap2 1_6
       rect:
         serializedVersion: 2
         x: 64
@@ -237,14 +237,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 42711f8518e7ff546a93c7345d545dee
-      internalID: -2130816162
+      spriteID: eb7eb20b3189a58488a6209e07069d21
+      internalID: -1608965355
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_7
+      name: Basic Tilemap2 1_7
       rect:
         serializedVersion: 2
         x: 0
@@ -258,14 +258,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a8b7d88b54bea044ebd41bab819caea3
-      internalID: 1650494969
+      spriteID: e2ccee0488c631145af48bfb172ec559
+      internalID: 548898422
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_8
+      name: Basic Tilemap2 1_8
       rect:
         serializedVersion: 2
         x: 32
@@ -279,14 +279,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 42f5c9b96aaf22b448e3becdd653b706
-      internalID: 1498745755
+      spriteID: 2a0b28e12c82fd940b501bb49b07a38f
+      internalID: 27445425
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_9
+      name: Basic Tilemap2 1_9
       rect:
         serializedVersion: 2
         x: 64
@@ -300,14 +300,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b17969cb9c22e7947a8079ff849639e8
-      internalID: -487960659
+      spriteID: ebe751c6dc11dd84b9139b08dd5275ab
+      internalID: 1253946169
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_10
+      name: Basic Tilemap2 1_10
       rect:
         serializedVersion: 2
         x: 0
@@ -321,14 +321,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: a4cea859c3d7d03489cc73b391ae2821
-      internalID: 63108479
+      spriteID: ba0f15ad90163a742a3bfd42bc0c2b0a
+      internalID: 61260311
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_11
+      name: Basic Tilemap2 1_11
       rect:
         serializedVersion: 2
         x: 32
@@ -342,14 +342,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 8d632b6e55953e545b67c17f1887d0c0
-      internalID: -139735731
+      spriteID: 20582c60d85553a4c9424b6f940c06a2
+      internalID: -1436917118
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic Tilemap_12
+      name: Basic Tilemap2 1_12
       rect:
         serializedVersion: 2
         x: 64
@@ -363,8 +363,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9d9494cdb742f244fa0edf0da4e8652b
-      internalID: -1518026369
+      spriteID: 4acf5ef63c569774399c2f76d2218115
+      internalID: 95994741
       vertices: []
       indices: 
       edges: []
@@ -380,19 +380,19 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Basic Tilemap_0: 908656110
-      Basic Tilemap_1: -1500210445
-      Basic Tilemap_10: 63108479
-      Basic Tilemap_11: -139735731
-      Basic Tilemap_12: -1518026369
-      Basic Tilemap_2: 1227125971
-      Basic Tilemap_3: 1665698889
-      Basic Tilemap_4: -281137706
-      Basic Tilemap_5: 1387468457
-      Basic Tilemap_6: -2130816162
-      Basic Tilemap_7: 1650494969
-      Basic Tilemap_8: 1498745755
-      Basic Tilemap_9: -487960659
+      Basic Tilemap2 1_0: -1519348513
+      Basic Tilemap2 1_1: -1448064477
+      Basic Tilemap2 1_10: 61260311
+      Basic Tilemap2 1_11: -1436917118
+      Basic Tilemap2 1_12: 95994741
+      Basic Tilemap2 1_2: -1273195425
+      Basic Tilemap2 1_3: 1894556455
+      Basic Tilemap2 1_4: 694952726
+      Basic Tilemap2 1_5: 865741014
+      Basic Tilemap2 1_6: -1608965355
+      Basic Tilemap2 1_7: 548898422
+      Basic Tilemap2 1_8: 27445425
+      Basic Tilemap2 1_9: 1253946169
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
