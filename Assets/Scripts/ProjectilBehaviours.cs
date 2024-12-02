@@ -58,6 +58,8 @@ public class ProjectilBehaviours : MonoBehaviour
             Vector2 predictedPos = (Vector2)target.transform.position + target.GetComponent<Rigidbody2D>().velocity*(timeToImpact/spred);
             direction = (predictedPos - (Vector2)transform.position).normalized;
         }
+
+        OrientSprit(direction);
     }
 
     void Update()
@@ -73,7 +75,8 @@ public class ProjectilBehaviours : MonoBehaviour
         //Follow the targe if Aimed type
         if (type.Equals(Type.Aimed)){
             if (Vector2.Distance(transform.position, target.transform.position) > stopAimDistance) {
-                direction = (target.transform.position - transform.position);
+                direction = target.transform.position - transform.position;
+                OrientSprit(direction);
             }
         }
 
@@ -103,5 +106,14 @@ public class ProjectilBehaviours : MonoBehaviour
     public void SetTarget(GameObject target)
     {
         this.target = target;
+    }
+
+    void OrientSprit(Vector2 direction)
+    {
+        // Calculate the angle in radians and convert to degrees
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        // Apply rotation to the sprite (z-axis is used for 2D rotation)
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle - 90)); // Subtract 90 degrees if the sprite's "up" is its top
     }
 }
