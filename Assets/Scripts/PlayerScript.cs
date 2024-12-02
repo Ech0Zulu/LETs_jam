@@ -10,6 +10,10 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     [SerializeField]
+    private Animator hudDashAnimator;
+    [SerializeField]
+    private Animator hudAttackAnimator;
+    [SerializeField]
     private float Orientation = 1; // The X scale factor for the player. -1 when faceing left, 1 when facing right
 
     [Header("Jump")]
@@ -107,7 +111,7 @@ public class PlayerMovement : MonoBehaviour
             HandleAttack();
         }
         Flip();
-        HandleAnimator();
+        HandleAnimators();
         UpdateFLOW();
     }
 
@@ -135,7 +139,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void HandleAnimator()
+    private void HandleAnimators()
     {
         //Debug.Log(Mathf.Abs(rb.velocity.x) + " " + Mathf.Abs(rb.velocity.y) + " " + isGrounded);
         animator.SetFloat("XSpeed", Mathf.Abs(rb.velocity.x));
@@ -144,6 +148,9 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("isTouchingWall", isTouchingWall);
         animator.SetBool("isDashing", isDashing);
         animator.SetBool("isAttacking", isAttacking);
+
+        hudDashAnimator.SetFloat("DashCD",(1-(curDashCD/dashCD))*100);
+        hudAttackAnimator.SetFloat("AttackCD",(1-curAttackCD/attackCD)*100);
     }
 
     private void Flip()
@@ -180,7 +187,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleAttack()
     {
-        /*if (!canAttack)
+        if (!canAttack)
         {
             curAttackCD += Time.deltaTime;
             if (curAttackCD >= attackCD)
@@ -188,10 +195,9 @@ public class PlayerMovement : MonoBehaviour
                 curAttackCD = 0f;
                 canAttack = true;
             }
-        }*/
-        if (Input.GetMouseButtonDown(1))
+        }
+        else if (Input.GetMouseButtonDown(1))
         {
-            Debug.Log("BANZAI !");
             if (nearestEnemy != null)
             {
                 Vector2 enemyPos = nearestEnemy.transform.position;
