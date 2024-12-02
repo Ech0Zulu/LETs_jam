@@ -4,6 +4,7 @@ using System.Net;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.Timeline;
+using UnityEngine.UIElements;
 
 public class ProjectilBehaviours : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public class ProjectilBehaviours : MonoBehaviour
 
     [Header("Acceleration")]
     public bool doAccelerate = false;           //Boolean to enable the Acceleration
-    public float accelerationSpeed = 1.0f;      //Acceleration variable (linéar)
+    public float accelerationSpeed = 2.0f;      //Acceleration variable (linï¿½ar)
     public float maxSpeed = 10.0f;              //Maximum speed
 
     [Header("Aimed")]
@@ -35,17 +36,26 @@ public class ProjectilBehaviours : MonoBehaviour
     private Vector3 direction;                  //Direction of the projectile
     private float currentSpeed;                 //Current speed of the projectile
 
+    private void OnValidate()
+    {
+        // Clamp 'someValue' to prevent it from being below 1
+        if (spred < 1f)
+        {
+            spred = 1f;
+        }
+    }
+
     void Start()
     {
         //Set the initial Speed
         currentSpeed = initSpeed;
         //Set the direction toward the target
-        direction = (transform.position - target.transform.position)*-1;
+        direction = (target.transform.position - transform.position);
 
         //If Smart type, anticipate the target trajectory
         if (type.Equals(Type.Smart)){
             float timeToImpact = direction.magnitude / currentSpeed;
-            Vector2 predictedPos = (Vector2)target.transform.position + target.GetComponent<Rigidbody2D>().velocity*(timeToImpact/2);
+            Vector2 predictedPos = (Vector2)target.transform.position + target.GetComponent<Rigidbody2D>().velocity*(timeToImpact/spred);
             direction = (predictedPos - (Vector2)transform.position).normalized;
         }
     }
@@ -61,8 +71,10 @@ public class ProjectilBehaviours : MonoBehaviour
         }
 
         //Follow the targe if Aimed type
-        if(type.Equals(Type.Aimed) && Vector3.Distance(transform.position, target.transform.position) > stopAimDistance) {
-            direction = (transform.position - target.transform.position) * -1;
+        if (type.Equals(Type.Aimed)){
+            if (Vector2.Distance(transform.position, target.transform.position) > stopAimDistance) {
+                direction = (target.transform.position - transform.position);
+            }
         }
 
         //Move toward the target direction
@@ -73,8 +85,18 @@ public class ProjectilBehaviours : MonoBehaviour
     //Destroy if touch a entity
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Player")) Debug.Log("Player Hit !");
-        else Debug.Log("Collide with : " + other.name);
+        if (other.gameObject.CompareTag("Player"))
+        {
+            PlayerMovement playerMovement = other.gameObject.GetComponent<PlayerMovement>();
+            if (playerMovement != null)
+            {
+                // Call a method on the PlayerMovement script (e.g., HitByProjectile)
+                playerMovement.HitByProjectile(transform.position);
+            }
+            else
+            {
+            }
+        } 
         Destroy(this.gameObject);
     }
 

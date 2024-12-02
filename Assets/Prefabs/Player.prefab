@@ -65,7 +65,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2105464043667273835}
   - {fileID: 7986762182399678523}
   - {fileID: 3989326267844412115}
   m_Father: {fileID: 0}
@@ -196,14 +195,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 555dd9dcdaf3c5547bc32c5e50a6b91a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hudDashAnimator: {fileID: 0}
+  hudAttackAnimator: {fileID: 0}
   Orientation: 1
   jumpHeight: 25
   jumpRatio: 5
   airControlFactor: 0.1
   isGrounded: 0
-  maxSpeedReachable: 0
+  maxSpeed: 0
   acceleration: 0
   boostPerfectWallJump: 2
+  termialFallingSpeed: -20
+  ultimateMaxSpeed: 100
+  FLOW: 0
   isTouchingWall: 0
   wallJumpWindow: 3
   checkRadius: 0.2
@@ -218,13 +222,29 @@ MonoBehaviour:
   dashRange: 10
   dashCD: 3
   curDashCD: 3
+  canDodge: 1
+  isDodging: 0
+  isDamaged: 0
+  damageTimer: 0
+  damageTime: 1.5
+  dodgeCD: 2
+  dodgeDuration: 0.5
+  dodgeTime: 0
+  dodgingTime: 0
+  dodgeSpeedIncrement: 5
   canAttack: 0
-  attackCD: 1
+  attackCD: 0.5
   attackDistance: 5
-  detectionRadius: 10
+  isAttacking: 0
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
+  damageEjectionPower: 50
+  timeGrounded: 0
+  timeNotGrounded: 0
+  coyoteMaxTime: 0.1
+  jumpWindow: 0.1
+  perfectJumpSpeedGain: 2
 --- !u!95 &4876633896126095667
 Animator:
   serializedVersion: 5
@@ -246,98 +266,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!1 &2475907692344419399
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2105464043667273835}
-  - component: {fileID: 4160680205857379702}
-  - component: {fileID: 226932511913258885}
-  m_Layer: 0
-  m_Name: Main Camera
-  m_TagString: MainCamera
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2105464043667273835
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2475907692344419399}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.936, z: -20}
-  m_LocalScale: {x: 2, y: 2, z: 2}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 7282646488511587804}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!20 &4160680205857379702
-Camera:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2475907692344419399}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
-  m_projectionMatrixMode: 1
-  m_GateFitMode: 2
-  m_FOVAxisMode: 0
-  m_Iso: 200
-  m_ShutterSpeed: 0.005
-  m_Aperture: 16
-  m_FocusDistance: 10
-  m_FocalLength: 50
-  m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
-  m_BarrelClipping: 0.25
-  m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
-  m_LensShift: {x: 0, y: 0}
-  m_NormalizedViewPortRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
-  orthographic: 1
-  orthographic size: 10
-  m_Depth: -1
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingPath: -1
-  m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
-  m_TargetEye: 0
-  m_HDR: 1
-  m_AllowMSAA: 0
-  m_AllowDynamicResolution: 0
-  m_ForceIntoRT: 0
-  m_OcclusionCulling: 0
-  m_StereoConvergence: 10
-  m_StereoSeparation: 0.022
---- !u!81 &226932511913258885
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2475907692344419399}
-  m_Enabled: 1
 --- !u!1 &6956094353564146004
 GameObject:
   m_ObjectHideFlags: 0

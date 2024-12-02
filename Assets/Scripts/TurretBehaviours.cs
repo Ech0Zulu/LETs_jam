@@ -1,13 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ProjectilSpawnBehaviours : MonoBehaviour
 {
     [SerializeField]
     private GameObject projectilPrefab;
-    [SerializeField]
-    private GameObject player;
 
     public float attackRange = 20f;
     public float attackSpeed = 1f;
@@ -18,17 +17,23 @@ public class ProjectilSpawnBehaviours : MonoBehaviour
     void Update()
     {
         timeSinceLastAttack += Time.deltaTime;
-        playerDistance = Vector3.Distance(player.transform.position, transform.position);
-        if ( playerDistance < attackRange && timeSinceLastAttack > attackSpeed)
-            AttackPlayer();
-    }
+        Collider2D[] detected = Physics2D.OverlapCircleAll(transform.position, attackRange, LayerMask.GetMask("Default"));
 
-    private void AttackPlayer()
-    {
-        timeSinceLastAttack = 0f;
-        GameObject projectile = Instantiate(projectilPrefab, transform.position, Quaternion.identity);
-        projectile.GetComponent<ProjectilBehaviours>().SetTarget(player);
-        Debug.Log("*Attack the player*");
+        if (detected.Length > 0 && timeSinceLastAttack > attackSpeed)
+        {
+            foreach (Collider2D enemy in detected)
+            {
+                if (detected.Length > 0 && timeSinceLastAttack > attackSpeed)
+                {
+                    if (enemy.CompareTag("Player"))
+                    {
+                        Debug.Log("Found an enemy");
+                        timeSinceLastAttack = 0f;
+                        GameObject projectile = Instantiate(projectilPrefab, transform.position, Quaternion.identity);
+                        projectile.GetComponent<ProjectilBehaviours>().SetTarget(enemy.gameObject);
+                    }
+                }
+            }
+        }
     }
-
 }
