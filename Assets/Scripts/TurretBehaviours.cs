@@ -18,7 +18,7 @@ public class ProjectilSpawnBehaviours : MonoBehaviour
     void Update()
     {
         timeSinceLastAttack += Time.deltaTime;
-        playerDistance = Vector3.Distance(player.transform.position, transform.position);
+        playerDistance = Vector2.Distance(player.transform.position, transform.position);
         if ( playerDistance < attackRange && timeSinceLastAttack > attackSpeed)
             AttackPlayer();
     }
@@ -28,7 +28,6 @@ public class ProjectilSpawnBehaviours : MonoBehaviour
         timeSinceLastAttack = 0f;
         GameObject projectile = Instantiate(projectilPrefab, transform.position, Quaternion.identity);
         projectile.GetComponent<ProjectilBehaviours>().SetTarget(player);
-        Debug.Log("*Attack the player*");
     }
 
 }

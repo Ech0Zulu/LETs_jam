@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Data.Common;
 using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using Unity.VisualScripting;
@@ -52,6 +53,18 @@ public class PlayerMovement : MonoBehaviour
     public float dashCD = 3f;
     public float curDashCD = 3f;
 
+    [Header("Dodge")]
+    public bool canDodge = true;
+    public bool isDodging = false;
+    public bool isDamaged = false;
+    public float damageTimer = 0f;
+    public float damageTime = 1.5f;
+    public float dodgeCD = 2f;
+    public float dodgeDuration = 0.5f;
+    public float dodgeTime = 0f;
+    public float dodgingTime = 0f;
+    public float dodgeSpeedIncrement = 5f;
+
     [Header("Attack")]
     public bool canAttack = false;                  //Boolean to know if the player can attack
     public float attackCD = 1f;                     //Cooldown of the attack
@@ -62,6 +75,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Enemies")]
     public LayerMask enemyLayer;                    // Layer mask for enemies
     private GameObject nearestEnemy;                // Nearest enemy detected
+    public float damageEjectionPower = 50;
 
     [Header("ToSort")]
     public float timeGrounded = 0f;
@@ -95,20 +109,56 @@ public class PlayerMovement : MonoBehaviour
         FLOW = maxSpeed;
     }
 
+    void UpdateDamage()
+    {
+        damageTimer = UpdateTimer(damageTimer);
+        if (damageTimer == 0)
+        {
+            isDamaged = false;
+        }
+    }
+
+    void UpdateDodge()
+    {
+        dodgeTime = UpdateTimer(dodgeTime);
+        dodgingTime = UpdateTimer(dodgingTime);
+        if (dodgeTime == 0) canDodge = true;
+        if (dodgingTime == 0) isDodging = false;
+    }
+
+    float UpdateTimer(float timer)
+    {
+        timer -= Time.deltaTime;
+        if (timer <= 0) 
+        {
+            timer = 0;
+        }
+        return timer;
+    }
+
     void Update()
     {
         float dt = Time.deltaTime;
-        isTouchingWall = IsTouchingWall();
-        isGrounded = IsGrounded();
+        
         updateGroundedOrNotTime();
-        HandleDash();
-        if (!isDashing)
+        UpdateDodge();
+        if (isDamaged)
         {
-            BufferTheSpeed();
-            HandleMovement();
-            HandleJump();
-            DetectNearestEnemy();
-            HandleAttack();
+            UpdateDamage();
+        }
+        else
+        {
+            isTouchingWall = IsTouchingWall();
+            isGrounded = IsGrounded();
+            HandleDash();
+            if (!isDashing)
+            {
+                BufferTheSpeed();
+                HandleMovement();
+                HandleJump();
+                DetectNearestEnemy();
+                HandleAttack();
+            }
         }
         Flip();
         HandleAnimators();
@@ -170,8 +220,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleDash()
     {
-        if (curDashCD > 0) curDashCD -= Time.deltaTime;
-        if (curDashCD < 0) curDashCD = 0;
+        if (curDashCD > 0) curDashCD = UpdateTimer(curDashCD);
         if (CanDash() && (Input.GetMouseButtonDown(0)))
         {
             // Get one of the 8 direction possible depending on ZQSD/WASD
@@ -202,7 +251,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 Vector2 enemyPos = nearestEnemy.transform.position;
                 isAttacking = true;
-                Debug.Log(enemyPos);
                 float playerSpeed = rb.velocity.magnitude;
                 Vector2 direction = (enemyPos - (Vector2)transform.position).normalized;
                 rb.velocity = direction * (playerSpeed + 5);
@@ -320,10 +368,8 @@ public class PlayerMovement : MonoBehaviour
         {
             foreach (Collider2D enemy in detectedEnemies)
             {
-                Debug.Log(enemy.name);
                 if (enemy.CompareTag("Enemy"))
                 {
-                    Debug.Log("Enemy found : " + enemy.gameObject.name);
                     float distanceToEnemy = Vector2.Distance(transform.position, enemy.transform.position);
                     if (distanceToEnemy < shortestDistance)
                     {
@@ -333,11 +379,6 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
         }
-        if (nearestEnemy != null)
-        {
-            Debug.Log("Nearest enemy : " + nearestEnemy.name);
-        }
-        else Debug.Log("No enemy around");
     }
 
     void HandleMovement()
@@ -448,11 +489,30 @@ public class PlayerMovement : MonoBehaviour
         jumpForce = Mathf.Sqrt(jumpRatio * Mathf.Abs(gravity) * jumpHeight); // Making sure the player still jump at the same height
     }
 
-    void LeaveWall()
+    public void HitByProjectile(Vector2 projectile)
     {
-        speedBuffer = 0;
-        wallTouchTime = 0;
-        rb.gravityScale = 7;
+        if (isDodging)
+        {
+            IncreaseSpeed(dodgeSpeedIncrement);
+        }
+        else TakeDamage(projectile);
+    }
+
+    void TakeDamage(Vector2 projectile)
+    {
+        Vector2 pushBack = (rb.position - projectile).normalized;
+        if (isGrounded) pushBack.y *= -1;
+
+        rb.velocity = pushBack * damageEjectionPower;
+        isDamaged = true;
+        if (!isDamaged) damageTimer = damageTime;
+    }
+
+    void IncreaseSpeed(float increment)
+    {
+        Vector2 speed = rb.velocity;
+        float magnitude = speed.magnitude;
+        rb.velocity = speed.normalized * (magnitude + increment);
     }
 
     public void Respawn(Vector2 respawnPoint)
