@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ProjectilSpawnBehaviours : MonoBehaviour
@@ -7,7 +8,7 @@ public class ProjectilSpawnBehaviours : MonoBehaviour
     [SerializeField]
     private GameObject projectilPrefab;
     [SerializeField]
-    private GameObject player;
+    private LayerMask playerLayer;
 
     public float attackRange = 20f;
     public float attackSpeed = 1f;
@@ -18,16 +19,13 @@ public class ProjectilSpawnBehaviours : MonoBehaviour
     void Update()
     {
         timeSinceLastAttack += Time.deltaTime;
-        playerDistance = Vector2.Distance(player.transform.position, transform.position);
-        if ( playerDistance < attackRange && timeSinceLastAttack > attackSpeed)
-            AttackPlayer();
-    }
+        Collider2D[] player = Physics2D.OverlapCircleAll(transform.position, attackRange, playerLayer);
 
-    private void AttackPlayer()
-    {
-        timeSinceLastAttack = 0f;
-        GameObject projectile = Instantiate(projectilPrefab, transform.position, Quaternion.identity);
-        projectile.GetComponent<ProjectilBehaviours>().SetTarget(player);
+        if ( player.Length > 0 && timeSinceLastAttack > attackSpeed)
+        {
+            timeSinceLastAttack = 0f;
+            GameObject projectile = Instantiate(projectilPrefab, transform.position, Quaternion.identity);
+            projectile.GetComponent<ProjectilBehaviours>().SetTarget(player[0].gameObject);
+        }
     }
-
 }

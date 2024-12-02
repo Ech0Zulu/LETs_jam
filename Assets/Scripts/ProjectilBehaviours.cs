@@ -4,6 +4,7 @@ using System.Net;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.Timeline;
+using UnityEngine.UIElements;
 
 public class ProjectilBehaviours : MonoBehaviour
 {
@@ -35,6 +36,15 @@ public class ProjectilBehaviours : MonoBehaviour
     private Vector3 direction;                  //Direction of the projectile
     private float currentSpeed;                 //Current speed of the projectile
 
+    private void OnValidate()
+    {
+        // Clamp 'someValue' to prevent it from being below 1
+        if (spred < 1f)
+        {
+            spred = 1f;
+        }
+    }
+
     void Start()
     {
         //Set the initial Speed
@@ -45,7 +55,7 @@ public class ProjectilBehaviours : MonoBehaviour
         //If Smart type, anticipate the target trajectory
         if (type.Equals(Type.Smart)){
             float timeToImpact = direction.magnitude / currentSpeed;
-            Vector2 predictedPos = (Vector2)target.transform.position + target.GetComponent<Rigidbody2D>().velocity*(timeToImpact/2);
+            Vector2 predictedPos = (Vector2)target.transform.position + target.GetComponent<Rigidbody2D>().velocity*(timeToImpact/spred);
             direction = (predictedPos - (Vector2)transform.position).normalized;
         }
     }
