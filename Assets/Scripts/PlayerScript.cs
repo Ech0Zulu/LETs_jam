@@ -186,7 +186,7 @@ public class PlayerMovement : MonoBehaviour
         if (isAttacking && collision.gameObject.CompareTag("Enemy"))
         {
             isAttacking = false;
-            Destroy(collision.gameObject); // Destroy the enemy
+            Destroy(collision.gameObject);
         }
     }
 

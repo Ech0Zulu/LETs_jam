@@ -233,7 +233,7 @@ MonoBehaviour:
   dodgingTime: 0
   dodgeSpeedIncrement: 5
   canAttack: 0
-  attackCD: 1
+  attackCD: 0.5
   attackDistance: 5
   isAttacking: 0
   enemyLayer:
